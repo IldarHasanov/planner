@@ -92,6 +92,51 @@ button.ghead{width:calc(100% - 8px);text-align:left;padding:4px 0;font-family:in
 .lhead.open svg{transform:none}
 .lcard .task:first-of-type{border-top:1px solid var(--line)}
 #title .lem{margin-right:8px}
+#sheet .in.full{background:var(--bg);height:92vh;max-height:92vh;padding:0 16px calc(var(--bot) + 18px)}
+.fhead{position:sticky;top:0;z-index:2;background:var(--bg);display:flex;align-items:center;padding:16px 0 14px}
+.fhead h2{flex:1;text-align:center;margin:0;font-size:18px;font-weight:600}
+.fhead button{color:var(--accent);font-size:17px;min-width:90px;text-align:left}
+.fhead button:last-child{text-align:right;font-weight:600}
+.fhead button:disabled{opacity:.4}
+.nameRow{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:14px;padding:6px 14px;margin-bottom:14px}
+.nameRow input{flex:1;border:0;background:transparent;outline:none;font-size:18px;padding:10px 0;min-width:0}
+.emBtn{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:24px;color:var(--muted);flex:none}
+.emBtn svg{width:24px;height:24px}
+.emBtn.open{background:var(--accent-soft)}
+.emGrid{display:none;grid-template-columns:repeat(8,1fr);gap:4px;background:var(--card);border-radius:14px;padding:10px;margin:-6px 0 14px}
+.emGrid.on{display:grid}
+.emGrid button{aspect-ratio:1;border-radius:10px;font-size:24px;display:grid;place-items:center}
+.emGrid button.on{background:var(--accent-soft)}
+.emGrid button.none{font-size:13px;color:var(--muted);grid-column:span 2;aspect-ratio:auto}
+.fsec{background:var(--card);border-radius:16px;padding:16px;margin-bottom:14px}
+.fsec h4{margin:0 0 14px;font-size:17px;font-weight:500}
+.crow{display:flex;justify-content:space-between;gap:6px}
+.cdot{width:36px;height:36px;border-radius:50%;flex:none;position:relative;border:3px solid transparent;box-shadow:inset 0 0 0 2px var(--card)}
+.cdot.on{border-color:var(--accent)}
+.cdot.none{background:var(--card);border-color:var(--line)}
+.cdot.none::after{content:"";position:absolute;left:50%;top:15%;bottom:15%;width:2px;background:var(--p3);transform:translateX(-50%) rotate(45deg)}
+.cdot.none.on{border-color:var(--accent)}
+.cdot.custom{background:conic-gradient(#f55,#fd3,#3d6,#3cf,#66f,#d5f,#f55);overflow:hidden}
+.cdot.custom input{position:absolute;inset:0;opacity:0;width:100%;height:100%;border:0}
+.vrow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.vcard{text-align:center;font-size:15px;color:var(--muted)}
+.vcard .pv{height:96px;border:2px solid var(--line);border-radius:12px;margin-bottom:8px;position:relative;padding:10px;display:flex;flex-direction:column;gap:9px;overflow:hidden;background:var(--bg)}
+.vcard.on{color:var(--accent);font-weight:600}
+.vcard.on .pv{border-color:var(--accent)}
+.vcard.on .pv::after{content:"✓";position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font-size:12px;display:grid;place-items:center}
+.pv .ln{display:flex;align-items:center;gap:6px}.pv .ln i{width:8px;height:8px;border:1.5px solid var(--p0);border-radius:2px;flex:none}.pv .ln b{height:6px;border-radius:3px;background:var(--line);flex:1}
+.pv.kb{flex-direction:row}.pv.kb>div{flex:1;background:var(--card);border-radius:6px;padding:5px;display:flex;flex-direction:column;gap:5px}.pv.kb>div b{display:block;height:14px;border-radius:4px;background:var(--line)}
+.srow{display:flex;align-items:center;gap:8px;padding:14px 0;position:relative;font-size:17px}
+.srow+.srow{border-top:1px solid var(--line)}
+.srow .v{margin-left:auto;color:var(--muted);display:flex;align-items:center;gap:4px;white-space:nowrap;font-size:16px}
+.srow .v svg{width:16px;height:16px}
+.srow select{position:absolute;inset:0;opacity:0;width:100%;-webkit-appearance:none;appearance:none;border:0}
+/* kanban */
+.kanban{display:flex;gap:12px;overflow-x:auto;margin:0 -16px;padding:0 16px 10px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+.kcol{flex:0 0 82%;max-width:320px;scroll-snap-align:start}
+.kcol .ghead{margin-top:2px}
+.kcol .card{min-height:56px}
+.kempty{padding:16px;color:var(--muted);font-size:14px;text-align:center}
 .empty{text-align:center;color:var(--muted);padding:40px 20px}
 .empty b{display:block;font-size:40px;margin-bottom:6px}
 /* drawer */
@@ -360,7 +405,7 @@ const REPEATS={'':'Не повторять',daily:'Каждый день',weekda
 const REMINDS={'':'Без напоминания','0':'В момент события','5':'За 5 минут','15':'За 15 минут','30':'За 30 минут','60':'За 1 час','1440':'За 1 день'};
 function listById(id){return S.lists.find(l=>l.id===id)||S.lists[0]}
 function folderById(id){return S.folders.find(f=>f.id===id)}
-function listIcon(l){return l.emoji?`<span class="lem">${esc(l.emoji)}</span>`:`<i class="dot" style="background:${l.color}"></i>`}
+function listIcon(l){return l.emoji?`<span class="lem">${esc(l.emoji)}</span>`:`<i class="dot" style="background:${l.color||'var(--muted)'}"></i>`}
 function listsIn(fid){return S.lists.filter(l=>!l.system&&(l.folderId||'')===(fid||''))}
 function nextDate(date,rep){
   const d=pd(date);
@@ -424,13 +469,14 @@ function parseQuick(text){
 function newTask(over={}){
   return Object.assign({id:uid(),title:'',notes:'',listId:'inbox',priority:0,date:'',time:'',remind:null,repeat:'',subtasks:[],tags:[],done:false,createdAt:Date.now()},over);
 }
+function inSmart(x){const l=S.lists.find(q=>q.id===x.listId);return !(l&&l.hideSmart)}
 function smartFilter(key){
   const t=today();
   switch(key){
-    case'today':return x=>!x.done&&x.date&&x.date<=t;
-    case'tomorrow':return x=>!x.done&&x.date===addDays(t,1);
-    case'week':return x=>!x.done&&x.date&&x.date<=addDays(t,6);
-    case'all':return x=>!x.done;
+    case'today':return x=>!x.done&&x.date&&x.date<=t&&inSmart(x);
+    case'tomorrow':return x=>!x.done&&x.date===addDays(t,1)&&inSmart(x);
+    case'week':return x=>!x.done&&x.date&&x.date<=addDays(t,6)&&inSmart(x);
+    case'all':return x=>!x.done&&inSmart(x);
     case'done':return x=>x.done;
   }
   if(key.startsWith('tag:')){const g=key.slice(4);return x=>!x.done&&x.tags.includes(g)}
@@ -497,7 +543,11 @@ function renderTasks(){
   const tom=items.filter(t=>t.date===addDays(tdy,1));
   const later=items.filter(t=>t.date&&t.date>addDays(tdy,1));
   const nod=items.filter(t=>!t.date);
-  if(U.list==='week'){
+  const curL=S.lists.find(l=>l.id===U.list);
+  if(curL&&curL.view==='kanban'){
+    const cols=[['Просрочено',over,'red'],['Сегодня',tod],['Завтра',tom],['Позже',later],['Без даты',nod]].filter(c=>c[1].length||c[0]!=='Просрочено');
+    html+=`<div class="kanban">${cols.map(([t,its,cls])=>`<div class="kcol"><div class="ghead ${cls||''}"><span>${t}</span><span class="cnt">${its.length}</span></div><div class="card">${its.length?its.map(x=>taskRow(x,{hideList:true})).join(''):'<div class="kempty">Пусто</div>'}</div></div>`).join('')}</div>`;
+  }else if(U.list==='week'){
     html+=group('Просрочено',over,'red');
     for(let i=0;i<7;i++){const d=addDays(tdy,i);const lab=i<2?fmtDate(d):`${WDL[wdi(d)][0].toUpperCase()+WDL[wdi(d)].slice(1)}, ${fmtDate(d)}`;html+=group(lab,items.filter(t=>t.date===d).map(t=>taskRow(t,{hideDate:true})))}
   }else{
@@ -586,19 +636,20 @@ const LEMOJI=['📋','📝','💼','🏠','📦','🛒','📖','💡','🎯','�
 function emojiPicker(cur){return `<div class="chips" id="emj"><button class="chip ${!cur?'on':''}" data-em="">нет</button>${LEMOJI.map(e=>`<button class="chip ${e===cur?'on':''}" data-em="${e}">${e}</button>`).join('')}</div>`}
 function bindEmoji(st){SA('[data-em]').forEach(b=>b.onclick=()=>{st.emoji=b.dataset.em;SA('[data-em]').forEach(x=>x.classList.toggle('on',x===b))})}
 function editFolder(id){
-  const f=id?folderById(id):{name:'',emoji:'📁'};const st={emoji:f.emoji||''};
-  openSheet(`<div class="shead"><h2>${id?'Изменить папку':'Новая папка'}</h2></div>
-    <div class="field"><input class="inp" id="fname" placeholder="Название папки, например «Личный»" value="${esc(f.name)}"></div>
-    <div class="field"><label>Иконка</label>${emojiPicker(st.emoji)}</div>
-    ${id?'':`<p class="note">После создания добавьте в папку списки: при создании или изменении списка выберите эту папку.</p>`}
-    <div class="actions">${id?'<button class="btn danger" id="fdel">Удалить</button>':''}<span class="sp"></span><button class="btn sec" id="fcancel">Отмена</button><button class="btn" id="fsave">Сохранить</button></div>`);
-  bindEmoji(st);
+  const f=id?folderById(id):null;const st={name:f?f.name:'',emoji:f?f.emoji||'':'🗂️'};
+  openSheet(`<div class="fhead"><button id="fcancel">Отмена</button><h2>${id?'Изменить папку':'Создать папку'}</h2><button id="fsave">Применить</button></div>
+    ${emojiField(st).replace('placeholder="Имя"','placeholder="Название папки"')}
+    ${id?'':`<p class="note" style="margin:0 4px 14px">Чтобы положить список в папку, откройте список и выберите папку в поле «Папка».</p>`}
+    ${id?'<button class="btn danger" id="fdel" style="width:100%;padding:14px">Удалить папку</button>':''}`,null,'full');
+  const nm=SI('#lname');const sv=SI('#fsave');const upd=()=>{sv.disabled=!nm.value.trim()};nm.oninput=upd;upd();
+  bindEmojiField(st);
   SI('#fcancel').onclick=()=>closeSheet();
-  SI('#fsave').onclick=()=>{const n=SI('#fname').value.trim();if(!n){SI('#fname').focus();return}
-    if(id)Object.assign(f,{name:n,emoji:st.emoji});else{const nf={id:uid(),name:n,emoji:st.emoji};S.folders.push(nf);U.list='folder:'+nf.id;U.view='tasks'}
+  sv.onclick=()=>{const n=nm.value.trim();if(!n){nm.focus();return}
+    if(f)Object.assign(f,{name:n,emoji:st.emoji});else{const nf={id:uid(),name:n,emoji:st.emoji};S.folders.push(nf);U.list='folder:'+nf.id;U.view='tasks'}
     save();closeSheet();render()};
   if(id)SI('#fdel').onclick=()=>confirmBox(`Удалить папку «${esc(f.name)}»?`,'Списки и задачи останутся — они просто выйдут из папки.',()=>{
     S.lists.forEach(l=>{if(l.folderId===id)delete l.folderId});S.folders=S.folders.filter(x=>x.id!==id);if(U.list==='folder:'+id)U.list='today';save();render()});
+  if(!id)nm.focus();
 }
 function closeDrawer(){$('#drawer').classList.remove('on');$('#scrim').classList.remove('on')}
 $('#scrim').onclick=closeDrawer;
@@ -635,7 +686,7 @@ $('#scrim').onclick=closeDrawer;
 /* ----- sheet ----- */
 let sheetClose=null;
 function openSheet(html,onClose,compact){
-  const s=$('#sheet');const inn=s.querySelector('.in');inn.classList.toggle('compact',!!compact);inn.innerHTML=(compact?'':'<div class="grab"></div>')+html;s.querySelector('.in').scrollTop=0;
+  const s=$('#sheet');const inn=s.querySelector('.in');const full=compact==='full';inn.classList.toggle('compact',compact===true);inn.classList.toggle('full',full);inn.innerHTML=(compact?'':'<div class="grab"></div>')+html;s.querySelector('.in').scrollTop=0;
   s.classList.add('on');const sc=$('#sheetScrim');sc.style.opacity=1;sc.style.pointerEvents='auto';
   sheetClose=onClose||null;
 }
@@ -648,28 +699,55 @@ $('#sheetScrim').onclick=()=>closeSheet();
 const SI=s=>$('#sheet .in').querySelector(s);
 const SA=s=>$('#sheet .in').querySelectorAll(s);
 
+const EMOJI_ALL=['📋','📝','✅','📌','💼','🏠','📦','🛒','🛍️','📖','📚','🎓','💡','🎯','💪','🏃','🧘','🍎','💊','❤️','👶','🐶','💰','💳','🧾','✈️','🚗','🏖️','🎁','🎉','🎵','🎮','🧹','🔧','🛠️','💻','📱','📞','✉️','📅','⏰','🗂️','📁','🌱','⭐','🔥','🙏','🕌'];
+const LCOLORS=['#FF5A5A','#FFA933','#FFD21F','#E1E846','#30D158','#4A9DFF'];
+function emojiField(st){
+  return `<div class="nameRow"><button class="emBtn" id="emBtn" aria-label="Иконка">${st.emoji?esc(st.emoji):I.menu}</button><input id="lname" placeholder="Имя" value="${esc(st.name)}" autocomplete="off"></div>
+  <div class="emGrid" id="emGrid"><button class="none" data-em="">Без иконки</button>${EMOJI_ALL.map(e=>`<button data-em="${e}" class="${e===st.emoji?'on':''}">${e}</button>`).join('')}</div>`;
+}
+function bindEmojiField(st,onChange){
+  SI('#emBtn').onclick=()=>{SI('#emGrid').classList.toggle('on');SI('#emBtn').classList.toggle('open')};
+  SA('#emGrid [data-em]').forEach(b=>b.onclick=()=>{st.emoji=b.dataset.em;SI('#emBtn').innerHTML=st.emoji?esc(st.emoji):I.menu;SA('#emGrid [data-em]').forEach(x=>x.classList.toggle('on',x===b));SI('#emGrid').classList.remove('on');SI('#emBtn').classList.remove('open');onChange&&onChange()});
+}
 function editList(id,inFolder){
-  const l=id?S.lists.find(x=>x.id===id):{name:'',color:COLORS[S.lists.length%COLORS.length],emoji:'',folderId:inFolder||''};
-  const st={color:l.color,emoji:l.emoji||''};
-  const fopts=`<option value="">— без папки —</option>`+S.folders.map(f=>`<option value="${f.id}" ${f.id===(l.folderId||'')?'selected':''}>${esc((f.emoji?f.emoji+' ':'')+f.name)}</option>`).join('');
-  openSheet(`<div class="shead"><h2>${id?'Изменить список':'Новый список'}</h2></div>
-    <div class="field"><input class="inp" id="lname" placeholder="Название" value="${esc(l.name)}"></div>
-    <div class="field"><label>Иконка</label>${emojiPicker(st.emoji)}</div>
-    <div class="field"><label>Цвет</label><div class="chips">${COLORS.map(c=>`<button class="swatch ${c===st.color?'on':''}" data-c="${c}" style="background:${c}"></button>`).join('')}</div></div>
-    <div class="field"><label>Папка</label><select class="inp" id="lfold">${fopts}</select></div>
-    <div class="actions">${id?'<button class="btn danger" id="ldel">Удалить</button>':''}<span class="sp"></span><button class="btn sec" id="lcancel">Отмена</button><button class="btn" id="lsave">Сохранить</button></div>`);
-  bindEmoji(st);
-  SA('[data-c]').forEach(b=>b.onclick=()=>{st.color=b.dataset.c;SA('[data-c]').forEach(x=>x.classList.toggle('on',x===b))});
+  const l=id?S.lists.find(x=>x.id===id):null;
+  const st={name:l?l.name:'',emoji:l?l.emoji||'':'',color:l?l.color||'':'',view:l&&l.view||'list',folderId:l?l.folderId||'':(inFolder||''),hideSmart:!!(l&&l.hideSmart)};
+  const fopts=`<option value="">Нет</option>`+S.folders.map(f=>`<option value="${f.id}" ${f.id===st.folderId?'selected':''}>${esc((f.emoji?f.emoji+' ':'')+f.name)}</option>`).join('');
+  const custom=st.color&&!LCOLORS.includes(st.color);
+  openSheet(`<div class="fhead"><button id="lcancel">Отмена</button><h2>${id?'Изменить список':'Создать список'}</h2><button id="lsave">Применить</button></div>
+    ${emojiField(st)}
+    <div class="fsec"><h4>Цвет списка</h4><div class="crow">
+      <button class="cdot none ${!st.color?'on':''}" data-c="" aria-label="Без цвета"></button>
+      ${LCOLORS.map(c=>`<button class="cdot ${c===st.color?'on':''}" data-c="${c}" style="background:${c}"></button>`).join('')}
+      <label class="cdot custom ${custom?'on':''}" aria-label="Свой цвет"><input type="color" id="lcol" value="${custom?st.color:'#8E4EC6'}"></label></div>
+      <h4 style="margin-top:22px">Тип просмотра</h4>
+      <div class="vrow">
+        <button class="vcard ${st.view==='list'?'on':''}" data-view="list"><div class="pv"><div class="ln"><i style="border-color:var(--p3)"></i><b></b></div><div class="ln"><i style="border-color:var(--p1)"></i><b style="flex:.6"></b></div><div class="ln"><i></i><b style="flex:.8"></b></div></div>Список</button>
+        <button class="vcard ${st.view==='kanban'?'on':''}" data-view="kanban"><div class="pv kb"><div><b></b><b></b></div><div><b></b></div><div><b></b><b></b></div></div>Канбан</button>
+      </div></div>
+    <div class="fsec" style="padding:0 16px">
+      <div class="srow">Папка<span class="v"><span id="lfoldV">${esc(st.folderId?(folderById(st.folderId)||{}).name||'Нет':'Нет')}</span>${I.right}</span><select id="lfold">${fopts}</select></div>
+      <div class="srow">Показать в умном списке<span class="v"><span id="lsmV">${st.hideSmart?'Не показывать':'Все задачи'}</span>${I.right}</span><select id="lsm"><option value="0" ${st.hideSmart?'':'selected'}>Все задачи</option><option value="1" ${st.hideSmart?'selected':''}>Не показывать</option></select></div>
+    </div>
+    ${id?'<button class="btn danger" id="ldel" style="width:100%;padding:14px">Удалить список</button>':''}`,null,'full');
+  const nm=SI('#lname');const sv=SI('#lsave');const upd=()=>{sv.disabled=!nm.value.trim()};nm.oninput=upd;upd();
+  bindEmojiField(st);
+  SA('.cdot[data-c]').forEach(b=>b.onclick=()=>{st.color=b.dataset.c;SA('.cdot').forEach(x=>x.classList.toggle('on',x===b))});
+  SI('#lcol').oninput=e=>{st.color=e.target.value;SA('.cdot').forEach(x=>x.classList.toggle('on',x.classList.contains('custom')))};
+  SA('[data-view]').forEach(b=>b.onclick=()=>{st.view=b.dataset.view;SA('[data-view]').forEach(x=>x.classList.toggle('on',x===b))});
+  SI('#lfold').onchange=e=>{st.folderId=e.target.value;SI('#lfoldV').textContent=st.folderId?folderById(st.folderId).name:'Нет'};
+  SI('#lsm').onchange=e=>{st.hideSmart=e.target.value==='1';SI('#lsmV').textContent=st.hideSmart?'Не показывать':'Все задачи'};
   SI('#lcancel').onclick=()=>closeSheet();
-  SI('#lsave').onclick=()=>{const n=SI('#lname').value.trim();if(!n){SI('#lname').focus();return}
-    const fid=SI('#lfold').value;
-    if(id){Object.assign(l,{name:n,color:st.color,emoji:st.emoji});if(fid)l.folderId=fid;else delete l.folderId}
-    else{const nl={id:uid(),name:n,color:st.color,emoji:st.emoji};if(fid)nl.folderId=fid;S.lists.push(nl);U.list=nl.id;U.view='tasks'}
+  sv.onclick=()=>{const n=nm.value.trim();if(!n){nm.focus();return}
+    const data={name:n,color:st.color,emoji:st.emoji,view:st.view,hideSmart:st.hideSmart};
+    let tgt=l;if(!tgt){tgt={id:uid()};S.lists.push(tgt);U.list=tgt.id;U.view='tasks'}
+    Object.assign(tgt,data);if(st.folderId)tgt.folderId=st.folderId;else delete tgt.folderId;
     save();closeSheet();render()};
   if(id)SI('#ldel').onclick=()=>{
     const n=S.tasks.filter(t=>t.listId===id).length;
     confirmBox(`Удалить список «${esc(l.name)}»?`,n?`${n} ${plural(n,'задача будет перенесена','задачи будут перенесены','задач будут перенесены')} во «Входящие».`:'',()=>{
       S.tasks.forEach(t=>{if(t.listId===id)t.listId='inbox'});S.lists=S.lists.filter(x=>x.id!==id);if(U.list===id)U.list='inbox';save();render()})};
+  if(!id)nm.focus();
 }
 function confirmBox(title,text,ok,okLabel='Удалить'){
   openSheet(`<div class="shead"><h2>${title}</h2></div>${text?`<p class="note">${text}</p>`:''}
@@ -1100,7 +1178,7 @@ function renderMore(){
     <p class="note">Веб-приложение присылает уведомления, пока оно открыто или недавно свёрнуто. Для важных дел нажмите в задаче «📅 В Календарь iPhone» — тогда напомнит системный Календарь, даже если приложение закрыто.</p></div>
    <div class="card sec mt"><h3>💾 Где хранятся данные</h3>
     <p class="note">Только на этом устройстве, в браузере. Никаких аккаунтов и серверов. ${storageOk?'':'<b style="color:var(--p3)">Сейчас хранилище недоступно — данные не сохранятся после закрытия.</b>'} Делайте резервную копию раз в пару недель: если долго не открывать веб-приложение, iOS может очистить его данные.</p></div>
-   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v2.0</p>`;
+   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v2.1</p>`;
   main.querySelectorAll('[data-acc]').forEach(b=>b.onclick=()=>{S.settings.accent=b.dataset.acc;save();applyAccent();render()});
   main.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{S.settings.theme=b.dataset.th;save();applyTheme();render()});
   const nb=$('#nBtn');if(nb)nb.onclick=async()=>{
