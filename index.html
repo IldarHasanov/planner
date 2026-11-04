@@ -258,6 +258,12 @@ html.lock,html.lock body{overflow:hidden;overscroll-behavior:none}
 .wkstrip i{width:4px;height:4px;border-radius:50%;background:var(--accent);opacity:.7}
 .tga .mmore{text-align:left;padding:1px 4px}
 .ev{border-left-width:3px}
+main.calfit{display:flex;flex-direction:column;overflow:hidden;overflow:clip;padding-bottom:8px;flex:none;min-height:0}
+main.calfit .tgw{flex:1;display:flex;flex-direction:column;min-height:0}
+main.calfit .calhd{position:static;margin-top:0}
+main.calfit .tgb{flex:1;height:auto;min-height:0;overscroll-behavior:contain}
+html.calfixed,html.calfixed body{overflow:hidden;overscroll-behavior:none}
+.calhd{position:sticky;top:calc(var(--top) + 48px);z-index:4;background:var(--bg);margin-top:-4px;padding:4px 0}
 /* kanban */
 .kanban{display:flex;gap:12px;overflow-x:auto;margin:0 -16px;padding:0 16px 10px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
 .kcol{flex:0 0 82%;max-width:320px;scroll-snap-align:start}
@@ -651,7 +657,7 @@ function render(){
   $('#menuBtn').style.visibility=U.view==='tasks'&&!U.sel?'visible':'hidden';
   $('#fab').style.display=(U.view==='focus'||U.view==='more'||U.sel)?'none':'grid';
   $('#topActions').innerHTML='';
-  main.classList.remove('nodet','selmode');
+  main.classList.remove('nodet','selmode','calfit');main.style.height='';document.documentElement.classList.remove('calfixed');
   ({tasks:renderTasks,cal:renderCal,habits:renderHabits,focus:renderFocus,more:renderMore})[U.view]();
   applyBg();drawSelBar();
 }
@@ -1345,7 +1351,7 @@ function renderCal(){
   if(mode==='year')h+=yearView(ref.getFullYear());
   else if(mode==='list'){h+=miniMonth(ref);h+=`<div class="agenda">${dayAgenda(U.calSel)}</div>`}
   else if(mode==='month'){h+=bigMonth(ref);h+=`<div class="agenda">${dayAgenda(U.calSel)}</div>`}
-  else{const n=mode==='week'?7:mode==='3day'?3:1;const s=mode==='week'?addDays(U.calRef,-wdi(U.calRef)):U.calRef;h+=timeGrid(s,n)}
+  else{const n=mode==='week'?7:mode==='3day'?3:1;const s=mode==='week'?addDays(U.calRef,-wdi(U.calRef)):U.calRef;h+=timeGrid(s,n);main.classList.add('calfit');document.documentElement.classList.add('calfixed')}
   main.innerHTML=h;
   const step=d=>{const r=pd(U.calRef);
     if(mode==='year'){r.setFullYear(r.getFullYear()+d);U.calRef=ds(r)}
@@ -1363,8 +1369,13 @@ function renderCal(){
   const tb=main.querySelector('.tgb');if(tb){const hasToday=!!tb.querySelector('.nowl');const hh=+(tb.querySelector('[data-hh]')||{dataset:{hh:48}}).dataset.hh;tb.scrollTop=Math.max(0,(hasToday?Math.min(new Date().getHours(),20)-1:7)*hh)}
   main.querySelectorAll('[data-wk]').forEach(b=>b.onclick=()=>{U.calRef=U.calSel=b.dataset.wk;render()});
   main.querySelectorAll('[data-adm]').forEach(b=>b.onclick=e=>{e.stopPropagation();U.allDayOpen=b.dataset.adm==='1';render()});
+  fitCal();
   bindTaskEvents();
 }
+/* сетка по часам занимает ровно экран: шапка не уезжает, прокручиваются только часы */
+function fitCal(){if(!main.classList.contains('calfit'))return;window.scrollTo(0,0);const top=main.getBoundingClientRect().top;const tabs=$('#tabs').offsetHeight;const vh=(window.visualViewport?visualViewport.height:innerHeight);main.style.height=Math.max(320,vh-top-tabs)+'px'}
+window.addEventListener('resize',fitCal);
+main.addEventListener('scroll',()=>{if(main.classList.contains('calfit')&&main.scrollTop)main.scrollTop=0});
 function miniMonth(ref){
   const tdy=today();const first=new Date(ref.getFullYear(),ref.getMonth(),1);const start=addDays(ds(first),-((first.getDay()+6)%7));
   let h=`<div class="card" style="padding:8px"><div class="grid7">${WD.map(w=>`<div class="wdh">${w}</div>`).join('')}`;
@@ -1437,7 +1448,7 @@ function timeGrid(start,n){
       const top=start/60*HH;const w=100/nc;const c=evColor(t);
       return `<button class="ev ${t.done?'dn':''}" data-ev="${t.id}" style="top:${top}px;height:${DUR/60*HH-3}px;left:calc(${col*w}% + 2px);width:calc(${w}% - 4px);right:auto;border-left-color:${c};background:${mix(card,c,dark?.32:.2)}">${esc(t.title)}${(n<7&&nc<3)?`<small>${t.time}</small>`:''}</button>`}).join('')}${d===tdy?`<div class="nowl" style="top:${nowTop}px"></div>`:''}</div>`;
   });
-  return h+`</div></div></div><p class="note" style="margin:8px 4px 0">Нажмите на пустое место в сетке, чтобы добавить задачу на это время.</p>`;
+  return h+`</div></div></div>`;
 }
 function dayAgenda(d,compact){
   const ts=tasksOn(d);const dd=pd(d);const tdy=today();
@@ -1630,7 +1641,7 @@ function renderMore(){
     <p class="note">Веб-приложение присылает уведомления, пока оно открыто или недавно свёрнуто. Для важных дел нажмите в задаче «📅 В Календарь iPhone» — тогда напомнит системный Календарь, даже если приложение закрыто.</p></div>
    <div class="card sec mt"><h3>💾 Где хранятся данные</h3>
     <p class="note">Только на этом устройстве, в браузере. Никаких аккаунтов и серверов. ${storageOk?'':'<b style="color:var(--p3)">Сейчас хранилище недоступно — данные не сохранятся после закрытия.</b>'} Делайте резервную копию раз в пару недель: если долго не открывать веб-приложение, iOS может очистить его данные.</p></div>
-   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v2.9</p>`;
+   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v3.0</p>`;
   main.querySelectorAll('[data-acc]').forEach(b=>b.onclick=()=>{S.settings.accent=b.dataset.acc;save();applyAccent();render()});
   main.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{S.settings.theme=b.dataset.th;save();applyTheme();render()});
   const nb=$('#nBtn');if(nb)nb.onclick=async()=>{
