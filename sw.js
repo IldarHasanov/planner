@@ -1,5 +1,5 @@
 // Кэширует приложение, чтобы оно открывалось без интернета.
-const CACHE = 'planner-v1';
+const CACHE = 'planner-v2';
 const FILES = ['./', './index.html', './manifest.json', './icon-180.png', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -18,7 +18,8 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   e.respondWith(
-    fetch(e.request)
+    // no-store: всегда брать свежую версию с сервера, минуя кэш браузера
+    fetch(e.request, { cache: 'no-store' })
       .then(res => {
         const copy = res.clone();
         caches.open(CACHE).then(c => c.put(e.request, copy));

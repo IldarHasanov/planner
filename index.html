@@ -910,7 +910,7 @@ function renderMore(){
     <p class="note">Веб-приложение присылает уведомления, пока оно открыто или недавно свёрнуто. Для важных дел нажмите в задаче «📅 В Календарь iPhone» — тогда напомнит системный Календарь, даже если приложение закрыто.</p></div>
    <div class="card sec mt"><h3>💾 Где хранятся данные</h3>
     <p class="note">Только на этом устройстве, в браузере. Никаких аккаунтов и серверов. ${storageOk?'':'<b style="color:var(--p3)">Сейчас хранилище недоступно — данные не сохранятся после закрытия.</b>'} Делайте резервную копию раз в пару недель: если долго не открывать веб-приложение, iOS может очистить его данные.</p></div>
-   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v1.0</p>`;
+   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v1.1</p>`;
   main.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{S.settings.theme=b.dataset.th;save();applyTheme();render()});
   const nb=$('#nBtn');if(nb)nb.onclick=async()=>{
     if(S.settings.notify&&Notification.permission==='granted'){S.settings.notify=false;save();render();return}
@@ -977,7 +977,9 @@ let lastDay=today();
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){tick();checkReminders();if(today()!==lastDay){lastDay=today();render()}}});
 
 if('serviceWorker' in navigator&&!inFrame&&location.protocol==='https:'){
-  navigator.serviceWorker.register('sw.js').then(r=>{swReg=r}).catch(()=>{});
+  navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>{swReg=r;r.update()}).catch(()=>{});
+  // когда новая версия установилась — один раз перезагрузить страницу
+  let reloaded=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(reloaded)return;reloaded=true;location.reload()});
 }
 </script>
 </body>
