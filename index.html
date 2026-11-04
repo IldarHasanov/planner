@@ -225,7 +225,7 @@ button.ghead{width:calc(100% - 8px);text-align:left;padding:4px 0;font-family:in
 .mcell.out{opacity:.45}
 .mcell.today .n{color:#fff;background:var(--accent);border-radius:9px;padding:0 5px;align-self:flex-start;font-weight:700}
 .mcell.sel{background:var(--accent-soft)}
-.mchip{font-size:10px;line-height:14px;padding:0 3px;border-radius:3px;background:var(--accent-soft);color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:2px solid var(--accent)}
+.mchip{text-align:left;display:block;width:100%;font-size:10px;line-height:14px;padding:0 3px;border-radius:3px;background:var(--accent-soft);color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:2px solid var(--accent)}
 .mchip.dn{opacity:.5;text-decoration:line-through}
 .mmore{font-size:10px;color:var(--muted);padding-left:3px}
 .tgw{background:var(--card);border-radius:12px;overflow:hidden}
@@ -248,6 +248,16 @@ button.ghead{width:calc(100% - 8px);text-align:left;padding:4px 0;font-family:in
 .nowl::before{content:"";position:absolute;left:-4px;top:-3px;width:8px;height:8px;border-radius:50%;background:var(--p3)}
 html.lock,html.lock body{overflow:hidden;overscroll-behavior:none}
 #sheet .in,#dp .dpIn{will-change:transform}
+.wkstrip{display:grid;grid-template-columns:repeat(7,1fr);margin:0 0 8px}
+.wkstrip button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 0}
+.wkstrip small{font-size:11px;color:var(--muted)}
+.wkstrip b{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:15px;font-weight:600}
+.wkstrip button.t b{color:var(--accent)}
+.wkstrip button.on b{background:var(--card);box-shadow:0 1px 4px rgba(0,0,0,.12);color:var(--accent)}
+.wkstrip button.on.t b{background:var(--accent);color:#fff}
+.wkstrip i{width:4px;height:4px;border-radius:50%;background:var(--accent);opacity:.7}
+.tga .mmore{text-align:left;padding:1px 4px}
+.ev{border-left-width:3px}
 /* kanban */
 .kanban{display:flex;gap:12px;overflow-x:auto;margin:0 -16px;padding:0 16px 10px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
 .kcol{flex:0 0 82%;max-width:320px;scroll-snap-align:start}
@@ -1329,7 +1339,8 @@ function renderCal(){
   if(mode==='year')ttl=String(ref.getFullYear());
   else if(mode==='list'||mode==='month')ttl=`${MON[ref.getMonth()]}${ref.getFullYear()!==new Date().getFullYear()?' '+ref.getFullYear():''}`;
   else{const n=mode==='week'?7:mode==='3day'?3:1;const s=mode==='week'?addDays(U.calRef,-wdi(U.calRef)):U.calRef;const e=addDays(s,n-1);const a=pd(s),bb=pd(e);
-    ttl=n===1?`${a.getDate()} ${MONG[a.getMonth()]}, ${WDL[wdi(s)]}`:(a.getMonth()===bb.getMonth()?`${a.getDate()}–${bb.getDate()} ${MONG[a.getMonth()]}`:`${a.getDate()} ${MONS[a.getMonth()]} – ${bb.getDate()} ${MONS[bb.getMonth()]}`)}
+    const rel=s===tdy?'Сегодня':s===addDays(tdy,1)?'Завтра':s===addDays(tdy,-1)?'Вчера':`${a.getDate()} ${MONG[a.getMonth()]}, ${WD[wdi(s)].toLowerCase()}`;
+    ttl=n===1?`<small style="display:block;font-size:12px;font-weight:500;color:var(--muted)">${MON[a.getMonth()]}${a.getFullYear()!==new Date().getFullYear()?' '+a.getFullYear():''}</small>${rel}`:(a.getMonth()===bb.getMonth()?`${a.getDate()}–${bb.getDate()} ${MONG[a.getMonth()]}`:`${a.getDate()} ${MONS[a.getMonth()]} – ${bb.getDate()} ${MONS[bb.getMonth()]}`)}
   let h=`<div class="calhd"><button class="iconbtn" id="cPrev">${I.left}</button><div class="ttl" style="${mode==='day'||mode==='week'||mode==='3day'?'text-transform:none':''}">${ttl}</div><button class="btn sec sm" id="cToday">Сегодня</button><button class="iconbtn" id="cNext">${I.right}</button></div>`;
   if(mode==='year')h+=yearView(ref.getFullYear());
   else if(mode==='list'){h+=miniMonth(ref);h+=`<div class="agenda">${dayAgenda(U.calSel)}</div>`}
@@ -1347,9 +1358,11 @@ function renderCal(){
   main.querySelectorAll('[data-ym]').forEach(b=>b.onclick=()=>{U.calMode='month';U.calRef=b.dataset.ym;render()});
   main.querySelectorAll('[data-yd]').forEach(b=>b.onclick=e=>{e.stopPropagation();U.calMode='list';U.calRef=U.calSel=b.dataset.yd;render()});
   main.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>quickAdd({date:b.dataset.add}));
-  main.querySelectorAll('[data-slot]').forEach(c=>c.onclick=e=>{if(e.target!==c)return;const r=c.getBoundingClientRect();const hr=Math.max(0,Math.min(23,Math.floor((e.clientY-r.top)/48)));quickAdd({date:c.dataset.slot,time:pad(hr)+':00'})});
+  main.querySelectorAll('[data-slot]').forEach(c=>c.onclick=e=>{if(e.target!==c)return;const r=c.getBoundingClientRect();const hr=Math.max(0,Math.min(23,Math.floor((e.clientY-r.top)/(+c.dataset.hh||48))));quickAdd({date:c.dataset.slot,time:pad(hr)+':00'})});
   main.querySelectorAll('[data-ev]').forEach(b=>b.onclick=e=>{e.stopPropagation();openTask(b.dataset.ev)});
-  const tb=main.querySelector('.tgb');if(tb){const hasToday=!!tb.querySelector('.nowl');tb.scrollTop=Math.max(0,(hasToday?Math.min(new Date().getHours(),20)-1:7)*48)}
+  const tb=main.querySelector('.tgb');if(tb){const hasToday=!!tb.querySelector('.nowl');const hh=+(tb.querySelector('[data-hh]')||{dataset:{hh:48}}).dataset.hh;tb.scrollTop=Math.max(0,(hasToday?Math.min(new Date().getHours(),20)-1:7)*hh)}
+  main.querySelectorAll('[data-wk]').forEach(b=>b.onclick=()=>{U.calRef=U.calSel=b.dataset.wk;render()});
+  main.querySelectorAll('[data-adm]').forEach(b=>b.onclick=e=>{e.stopPropagation();U.allDayOpen=b.dataset.adm==='1';render()});
   bindTaskEvents();
 }
 function miniMonth(ref){
@@ -1388,19 +1401,43 @@ function yearView(y){
   }
   return h+'</div><p class="note" style="text-align:center;margin-top:14px">Нажмите на месяц, чтобы открыть его, или на число — чтобы увидеть задачи дня.</p>';
 }
+function layoutDay(evs,dur){
+  // раскладывает пересекающиеся задачи по колонкам: [{t,start,col,cols}]
+  const it=evs.map(t=>{const[hh,mm]=t.time.split(':').map(Number);return{t,start:hh*60+mm}}).sort((a,b)=>a.start-b.start||a.t.title.localeCompare(b.t.title));
+  let cluster=[],end=-1;const out=[];
+  const flush=()=>{const colsEnd=[];cluster.forEach(e=>{let c=colsEnd.findIndex(x=>x<=e.start);if(c<0){c=colsEnd.length;colsEnd.push(0)}colsEnd[c]=e.start+dur;e.col=c});cluster.forEach(e=>e.cols=colsEnd.length);out.push(...cluster);cluster=[]};
+  it.forEach(e=>{if(cluster.length&&e.start>=end){flush();end=-1}cluster.push(e);end=Math.max(end,e.start+dur)});
+  if(cluster.length)flush();
+  return out;
+}
+function evColor(t){const l=listById(t.listId);const c=t.priority===3?'#E5484D':t.priority===2?'#F5A524':(l.color&&l.color.startsWith('#')?l.color:(S.settings.accent||'#4772FA'));return c}
 function timeGrid(start,n){
   const tdy=today();const days=[];for(let i=0;i<n;i++)days.push(addDays(start,i));
-  const cols=`44px repeat(${n},minmax(0,1fr))`;
-  let h=`<div class="tgw"><div class="tgh" style="grid-template-columns:${cols}"><div></div>${days.map(d=>`<div class="${d===tdy?'t':''}">${WD[wdi(d)]}<b>${pd(d).getDate()}</b></div>`).join('')}</div>`;
-  h+=`<div class="tga" style="grid-template-columns:${cols}"><div>весь<br>день</div>${days.map(d=>`<div>${tasksOn(d).filter(t=>!t.time).map(t=>`<button class="mchip ${t.done?'dn':''}" data-ev="${t.id}" style="border-left-color:${t.priority?`var(--p${t.priority})`:'var(--accent)'}">${esc(t.title)}</button>`).join('')}</div>`).join('')}</div>`;
-  h+=`<div class="tgb"><div class="tgg" style="grid-template-columns:${cols};height:${24*48}px"><div class="hl">${Array.from({length:23},(_,i)=>`<span style="top:${(i+1)*48}px">${pad(i+1)}:00</span>`).join('')}</div>`;
-  const now=new Date();const nowTop=(now.getHours()*60+now.getMinutes())/60*48;
+  const HH=n===1?60:48;const DUR=n===1?55:55;const dark=isDark();const card=dark?'#1C1D22':'#FFFFFF';
+  const cols=`${n===1?36:44}px repeat(${n},minmax(0,1fr))`;
+  let h='';
+  if(n===1){
+    // полоса недели, как в TickTick
+    const mon=addDays(start,-wdi(start));
+    h+=`<div class="wkstrip">${Array.from({length:7},(_,i)=>{const d=addDays(mon,i);const has=tasksOn(d).length>0;return `<button class="${d===start?'on':''} ${d===tdy?'t':''}" data-wk="${d}"><small>${WD[i]}</small><b>${pd(d).getDate()}</b><i style="${has?'':'visibility:hidden'}"></i></button>`}).join('')}</div>`;
+  }
+  h+=`<div class="tgw">`;
+  if(n>1)h+=`<div class="tgh" style="grid-template-columns:${cols}"><div></div>${days.map(d=>`<div class="${d===tdy?'t':''}">${WD[wdi(d)]}<b>${pd(d).getDate()}</b></div>`).join('')}</div>`;
+  const allDay=days.map(d=>tasksOn(d).filter(t=>!t.time).sort((a,b)=>(a.done-b.done)||sortTasks(a,b)));
+  if(allDay.some(x=>x.length)){
+    const open=!!U.allDayOpen;const lim=n===1?3:2;
+    h+=`<div class="tga" style="grid-template-columns:${cols}"><div>весь<br>день</div>${allDay.map(list=>{const show=open?list:list.slice(0,lim);const more=list.length-show.length;
+      return `<div>${show.map(t=>{const c=evColor(t);return `<button class="mchip ${t.done?'dn':''}" data-ev="${t.id}" style="border-left-color:${c};background:${mix(card,c,dark?.3:.18)}">${esc(t.title)}</button>`}).join('')}${more>0?`<button class="mmore" data-adm="1">+${more} ещё</button>`:''}${open&&list.length>lim?`<button class="mmore" data-adm="0">свернуть</button>`:''}</div>`}).join('')}</div>`;
+  }
+  h+=`<div class="tgb"><div class="tgg" style="grid-template-columns:${cols};height:${24*HH}px"><div class="hl">${Array.from({length:23},(_,i)=>`<span style="top:${(i+1)*HH}px">${n===1?pad(i+1):pad(i+1)+':00'}</span>`).join('')}</div>`;
+  const now=new Date();const nowTop=(now.getHours()*60+now.getMinutes())/60*HH;
   days.forEach(d=>{
-    const evs=tasksOn(d).filter(t=>t.time);
-    h+=`<div class="col" data-slot="${d}">${evs.map(t=>{const[hh,mm]=t.time.split(':').map(Number);const top=(hh*60+mm)/60*48;
-      return `<button class="ev ${t.done?'dn':''}" data-ev="${t.id}" style="top:${top}px;height:${n===7?40:44}px;border-left-color:${t.priority?`var(--p${t.priority})`:'var(--accent)'}">${esc(t.title)}${n<7?`<small>${t.time}</small>`:''}</button>`}).join('')}${d===tdy?`<div class="nowl" style="top:${nowTop}px"></div>`:''}</div>`;
+    const lay=layoutDay(tasksOn(d).filter(t=>t.time),DUR);
+    h+=`<div class="col" data-slot="${d}" data-hh="${HH}" style="background-image:repeating-linear-gradient(to bottom,var(--line) 0 1px,transparent 1px ${HH}px)">${lay.map(({t,start,col,cols:nc})=>{
+      const top=start/60*HH;const w=100/nc;const c=evColor(t);
+      return `<button class="ev ${t.done?'dn':''}" data-ev="${t.id}" style="top:${top}px;height:${DUR/60*HH-3}px;left:calc(${col*w}% + 2px);width:calc(${w}% - 4px);right:auto;border-left-color:${c};background:${mix(card,c,dark?.32:.2)}">${esc(t.title)}${(n<7&&nc<3)?`<small>${t.time}</small>`:''}</button>`}).join('')}${d===tdy?`<div class="nowl" style="top:${nowTop}px"></div>`:''}</div>`;
   });
-  return h+'</div></div></div><p class="note" style="margin:8px 4px 0">Нажмите на пустое место в сетке, чтобы добавить задачу на это время.</p>';
+  return h+`</div></div></div><p class="note" style="margin:8px 4px 0">Нажмите на пустое место в сетке, чтобы добавить задачу на это время.</p>`;
 }
 function dayAgenda(d,compact){
   const ts=tasksOn(d);const dd=pd(d);const tdy=today();
@@ -1593,7 +1630,7 @@ function renderMore(){
     <p class="note">Веб-приложение присылает уведомления, пока оно открыто или недавно свёрнуто. Для важных дел нажмите в задаче «📅 В Календарь iPhone» — тогда напомнит системный Календарь, даже если приложение закрыто.</p></div>
    <div class="card sec mt"><h3>💾 Где хранятся данные</h3>
     <p class="note">Только на этом устройстве, в браузере. Никаких аккаунтов и серверов. ${storageOk?'':'<b style="color:var(--p3)">Сейчас хранилище недоступно — данные не сохранятся после закрытия.</b>'} Делайте резервную копию раз в пару недель: если долго не открывать веб-приложение, iOS может очистить его данные.</p></div>
-   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v2.8</p>`;
+   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v2.9</p>`;
   main.querySelectorAll('[data-acc]').forEach(b=>b.onclick=()=>{S.settings.accent=b.dataset.acc;save();applyAccent();render()});
   main.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{S.settings.theme=b.dataset.th;save();applyTheme();render()});
   const nb=$('#nBtn');if(nb)nb.onclick=async()=>{
