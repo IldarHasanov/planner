@@ -494,6 +494,35 @@ function openDrawer(){
 }
 function closeDrawer(){$('#drawer').classList.remove('on');$('#scrim').classList.remove('on')}
 $('#scrim').onclick=closeDrawer;
+/* свайп вправо — открыть панель списков, свайп влево — закрыть */
+(function(){
+  const dr=$('#drawer'),sc=$('#scrim');let sx=0,sy=0,mode=null,w=0,dx=0;
+  document.addEventListener('touchstart',e=>{
+    if(e.touches.length!==1||$('#sheet').classList.contains('on'))return;
+    const open=dr.classList.contains('on');
+    if(!open&&(U.view!=='tasks'||(e.target.closest&&e.target.closest('input,textarea,select'))))return;
+    sx=e.touches[0].clientX;sy=e.touches[0].clientY;mode=open?'close?':'open?';w=dr.offsetWidth;dx=0;
+  },{passive:true});
+  document.addEventListener('touchmove',e=>{
+    if(!mode)return;const x=e.touches[0].clientX-sx,y=e.touches[0].clientY-sy;
+    if(mode.endsWith('?')){
+      if(Math.abs(x)<10&&Math.abs(y)<10)return;
+      if(Math.abs(x)>Math.abs(y)*1.3&&((mode==='open?'&&x>0)||(mode==='close?'&&x<0))){mode=mode.slice(0,-1);dr.style.transition='none';sc.style.transition='none';
+        if(mode==='open'){openDrawer();dr.style.transform=`translateX(-${w}px)`}}
+      else{mode=null;return}
+    }
+    dx=x;
+    const pos=mode==='open'?Math.min(0,-w+x):Math.min(0,x);
+    dr.style.transform=`translateX(${pos}px)`;sc.style.opacity=String(1+pos/w);
+  },{passive:true});
+  document.addEventListener('touchend',()=>{
+    if(!mode||mode.endsWith('?')){mode=null;return}
+    dr.style.transition='';sc.style.transition='';dr.style.transform='';sc.style.opacity='';
+    if(mode==='open'&&dx<w*0.3)closeDrawer();
+    if(mode==='close'&&dx<-w*0.3)closeDrawer();
+    mode=null;
+  });
+})();
 
 /* ----- sheet ----- */
 let sheetClose=null;
@@ -910,7 +939,7 @@ function renderMore(){
     <p class="note">Веб-приложение присылает уведомления, пока оно открыто или недавно свёрнуто. Для важных дел нажмите в задаче «📅 В Календарь iPhone» — тогда напомнит системный Календарь, даже если приложение закрыто.</p></div>
    <div class="card sec mt"><h3>💾 Где хранятся данные</h3>
     <p class="note">Только на этом устройстве, в браузере. Никаких аккаунтов и серверов. ${storageOk?'':'<b style="color:var(--p3)">Сейчас хранилище недоступно — данные не сохранятся после закрытия.</b>'} Делайте резервную копию раз в пару недель: если долго не открывать веб-приложение, iOS может очистить его данные.</p></div>
-   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v1.1</p>`;
+   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v1.2</p>`;
   main.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{S.settings.theme=b.dataset.th;save();applyTheme();render()});
   const nb=$('#nBtn');if(nb)nb.onclick=async()=>{
     if(S.settings.notify&&Notification.permission==='granted'){S.settings.notify=false;save();render();return}
