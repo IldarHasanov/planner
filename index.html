@@ -209,15 +209,14 @@ button.ghead{width:calc(100% - 8px);text-align:left;padding:4px 0;font-family:in
 /* calendar views */
 .calhd{display:flex;align-items:center;gap:4px;margin-bottom:8px}
 .calhd .ttl{flex:1;font-weight:700;font-size:17px;text-transform:capitalize;text-align:center}
-.yr{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 10px}
-.ym{padding:4px;border-radius:10px;text-align:left}
-.ym b{display:block;font-size:13px;margin:0 0 4px 2px;text-transform:capitalize}
-.ym.cur b{color:var(--accent)}
-.ym .g{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;font-size:8.5px;text-align:center;color:var(--text)}
-.ym .g i{font-style:normal;line-height:13px;border-radius:50%;margin:0 .5px}
-.ym .g i.has{font-weight:700;color:var(--accent);background:var(--accent-soft);border-radius:3px;box-shadow:inset 0 0 0 1px var(--accent)}
-.ym .g i.t{background:var(--accent);color:#fff;box-shadow:none}
-.ym .g i.t.has{border-radius:3px}
+.yr{display:grid;grid-template-columns:repeat(3,1fr);align-items:start;gap:22px 10px;padding-top:8px;border-top:1px solid var(--line)}
+.ym{border-radius:10px;text-align:left;padding:0;display:flex;flex-direction:column;align-self:start;min-width:0}
+.ym b{display:block;font-size:20px;font-weight:700;margin:0 0 8px 0}
+.ym.cur b{color:var(--text)}
+.ym .g{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;font-size:10.5px;letter-spacing:-.3px;text-align:center;color:var(--text)}
+.ym .g i{font-style:normal;line-height:19px;border-radius:2px;font-variant-numeric:tabular-nums}
+.ym .g i.has{background:var(--accent-soft)}
+.ym .g i.t{background:var(--accent);color:#fff;font-weight:600}
 .mg{display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid var(--line);border-left:1px solid var(--line);background:var(--card);border-radius:10px;overflow:hidden}
 .mg .wdh{border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:4px 0}
 .mcell{min-height:78px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:3px 2px;text-align:left;display:flex;flex-direction:column;gap:2px;overflow:hidden;min-width:0}
@@ -1426,6 +1425,7 @@ function bigMonth(ref){
   }
   return h+'</div>';
 }
+const MONSHORT=['янв.','февр.','март','апр.','май','июнь','июль','авг.','сент.','окт.','нояб.','дек.'];
 function yearView(y){
   const tdy=today();const has=new Set();
   const rep=S.tasks.filter(t=>t.repeat&&!t.done&&t.date);
@@ -1434,10 +1434,10 @@ function yearView(y){
   let h='<div class="yr">';
   for(let m=0;m<12;m++){
     const first=new Date(y,m,1);const off=(first.getDay()+6)%7;const n=new Date(y,m+1,0).getDate();
-    let g=WD.map(w=>`<i style="color:var(--muted)">${w[0]}</i>`).join('');for(let i=0;i<off;i++)g+='<i></i>';
+    let g='';for(let i=0;i<off;i++)g+='<i></i>';
     for(let i=1;i<=n;i++){const d=`${y}-${pad(m+1)}-${pad(i)}`;g+=`<i class="${d===tdy?'t':''} ${has.has(d)?'has':''}" data-yd="${d}">${i}</i>`}
     const cur=y===new Date().getFullYear()&&m===new Date().getMonth();
-    h+=`<button class="ym ${cur?'cur':''}" data-ym="${y}-${pad(m+1)}-01"><b>${MON[m]}</b><div class="g">${g}</div></button>`;
+    h+=`<button class="ym ${cur?'cur':''}" data-ym="${y}-${pad(m+1)}-01"><b>${MONSHORT[m]}</b><div class="g">${g}</div></button>`;
   }
   return h+'</div><p class="note" style="text-align:center;margin-top:14px">Нажмите на месяц, чтобы открыть его, или на число — чтобы увидеть задачи дня.</p>';
 }
@@ -1718,7 +1718,7 @@ function renderMore(){
     <p class="note">Веб-приложение присылает уведомления, пока оно открыто или недавно свёрнуто. Для важных дел нажмите в задаче «📅 В Календарь iPhone» — тогда напомнит системный Календарь, даже если приложение закрыто.</p></div>
    <div class="card sec mt"><h3>💾 Где хранятся данные</h3>
     <p class="note">Только на этом устройстве, в браузере. Никаких аккаунтов и серверов. ${storageOk?'':'<b style="color:var(--p3)">Сейчас хранилище недоступно — данные не сохранятся после закрытия.</b>'} Делайте резервную копию раз в пару недель: если долго не открывать веб-приложение, iOS может очистить его данные.</p></div>
-   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v3.6</p>`;
+   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v3.7</p>`;
   main.querySelectorAll('[data-acc]').forEach(b=>b.onclick=()=>{S.settings.accent=b.dataset.acc;save();applyAccent();render()});
   main.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{S.settings.theme=b.dataset.th;save();applyTheme();render()});
   const nb=$('#nBtn');if(nb)nb.onclick=async()=>{
