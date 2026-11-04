@@ -95,7 +95,13 @@ nav#tabs button.on{color:var(--accent)}
 .qa-btn span{overflow:hidden;text-overflow:ellipsis}
 @media (max-width:360px){.qa-btn{padding:0 4px;min-width:32px}#qaListL{display:none}}
 .qa-btn svg{width:21px;height:21px;flex:none}
-.qa-btn input,.qa-btn select{position:absolute;inset:0;width:100%;height:100%;opacity:0;border:0;-webkit-appearance:none;appearance:none}
+.qa-btn.open{background:var(--accent-soft);color:var(--accent)}
+.qa-panel{display:none;flex-wrap:nowrap;gap:6px;overflow-x:auto;padding:4px 0 8px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.qa-panel::-webkit-scrollbar{display:none}
+.qa-panel.on{display:flex}
+.qa-panel .chip{flex:none;white-space:nowrap}
+.qa-other{position:relative;overflow:hidden}
+.qa-other input{position:absolute;inset:0;width:100%;height:100%;opacity:0;border:0;-webkit-appearance:none;appearance:none}
 .qa-btn:active{background:var(--line)}
 .qa-sp{flex:1}
 .qa-send{width:38px;height:38px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;flex:none;transition:opacity .15s}
@@ -573,21 +579,62 @@ function confirmBox(title,text,ok,okLabel='Удалить'){
 /* ----- quick add (компактное окно над клавиатурой) ----- */
 function quickAdd(pre={}){
   const st={date:pre.date||'',time:'',priority:0,listId:pre.listId||'inbox',tags:(pre.tags||[]).slice()};
-  const listOpts=S.lists.map(l=>`<option value="${l.id}" ${l.id===st.listId?'selected':''}>${esc(l.name)}</option>`).join('');
   openSheet(`<input class="qa-title" id="qaTitle" placeholder="Что нужно сделать?" autocomplete="off" enterkeyhint="send">
     <input class="qa-note" id="qaNote" placeholder="Описание" autocomplete="off">
+    <div class="qa-panel" id="qaPanel"></div>
     <div class="qa-bar">
-      <label class="qa-btn" id="qaDateB">${I.cal}<span id="qaDateL"></span><input type="date" id="qaDate" value="${st.date}" aria-label="Дата"></label>
-      <label class="qa-btn" id="qaTimeB">${I.clock}<span id="qaTimeL"></span><input type="time" id="qaTime" aria-label="Время"></label>
+      <button class="qa-btn" id="qaDateB" aria-label="Дата">${I.cal}<span id="qaDateL"></span></button>
+      <button class="qa-btn" id="qaTimeB" aria-label="Время">${I.clock}<span id="qaTimeL"></span></button>
       <button class="qa-btn" id="qaPri" aria-label="Приоритет">${I.flag}</button>
-      <label class="qa-btn" id="qaListB">${I.folder}<span id="qaListL"></span><select id="qaList" aria-label="Список">${listOpts}</select></label>
+      <button class="qa-btn" id="qaListB" aria-label="Список">${I.folder}<span id="qaListL"></span></button>
       <button class="qa-btn" id="qaTag" aria-label="Тег" style="font-size:19px;font-weight:600">#</button>
       <button class="qa-btn" id="qaExp" aria-label="Подробнее">${I.expand}</button>
       <span class="qa-sp"></span>
       <button class="qa-send" id="qaSend" aria-label="Добавить" disabled>${I.send}</button>
     </div>`,()=>{if(SI('#qaTitle').value.trim())add(false)},true);
-  const ti=SI('#qaTitle');
+  const ti=SI('#qaTitle');const pn=SI('#qaPanel');
+  let lastInp=ti;ti.onfocus=()=>lastInp=ti;SI('#qaNote').onfocus=()=>lastInp=SI('#qaNote');
+  // вернуть фокус (и клавиатуру) в поле, где печатали; вызывается прямо в обработчике нажатия
+  const back=()=>{try{lastInp.focus({preventScroll:true})}catch(e){lastInp.focus()}};
+  // кнопки панели не забирают фокус у поля ввода — клавиатура не прячется
+  const keep=el=>el.addEventListener('mousedown',e=>e.preventDefault());
+  SA('.qa-bar button').forEach(keep);
   const PRI=['Без приоритета','Низкий','Средний','Высокий'];
+  let panel='';
+  function chip(val,label,on,extra=''){return `<button class="chip ${on?'on':''}" data-v="${esc(val)}" ${extra}>${label}</button>`}
+  function showPanel(kind){
+    panel=panel===kind?'':kind;
+    SA('.qa-bar .qa-btn').forEach(b=>b.classList.remove('open'));
+    if(!panel){pn.innerHTML='';pn.classList.remove('on');back();return}
+    const t=today();let html='';
+    if(kind==='date'){
+      const nm=addDays(t,(7-wdi(t))%7||7);
+      html=[chip(t,'Сегодня',st.date===t),chip(addDays(t,1),'Завтра',st.date===addDays(t,1)),chip(addDays(t,2),'Послезавтра',st.date===addDays(t,2)),chip(nm,'След. пн',st.date===nm),chip('','Без даты',!st.date)].join('')
+        +`<label class="chip qa-other">Другая…<input type="date" id="qaDateX" value="${st.date}"></label>`;
+    }else if(kind==='time'){
+      html=['09:00','12:00','15:00','18:00','21:00'].map(x=>chip(x,x,st.time===x)).join('')+chip('','Без времени',!st.time)
+        +`<label class="chip qa-other">Другое…<input type="time" id="qaTimeX" value="${st.time}"></label>`;
+    }else if(kind==='pri'){
+      html=[3,2,1,0].map(p=>chip(p,`<span style="color:${p?`var(--p${p})`:'var(--muted)'}">⚑</span> ${PRI[p]}`,st.priority===p)).join('');
+    }else if(kind==='list'){
+      html=S.lists.map(l=>chip(l.id,`<i class="dot" style="background:${l.color};width:8px;height:8px;display:inline-block;margin:0 4px 0 0"></i>${esc(l.name)}`,st.listId===l.id)).join('');
+    }
+    pn.innerHTML=html;pn.classList.add('on');
+    SI({date:'#qaDateB',time:'#qaTimeB',pri:'#qaPri',list:'#qaListB'}[kind]).classList.add('open');
+    pn.querySelectorAll('button.chip').forEach(c=>{keep(c);c.onclick=()=>{
+      const v=c.dataset.v;
+      if(kind==='date')st.date=v;
+      else if(kind==='time'){st.time=v;if(v&&!st.date)st.date=today()}
+      else if(kind==='pri')st.priority=+v;
+      else if(kind==='list')st.listId=v;
+      panel='';pn.innerHTML='';pn.classList.remove('on');SA('.qa-bar .qa-btn').forEach(b=>b.classList.remove('open'));
+      draw();back();
+    }});
+    const dx=pn.querySelector('#qaDateX'),tx=pn.querySelector('#qaTimeX');
+    const fin=()=>{panel='';pn.innerHTML='';pn.classList.remove('on');SA('.qa-bar .qa-btn').forEach(b=>b.classList.remove('open'));draw();back()};
+    if(dx)dx.onchange=()=>{st.date=dx.value;fin()};
+    if(tx)tx.onchange=()=>{st.time=tx.value;if(st.time&&!st.date)st.date=today();fin()};
+  }
   function draw(){
     SI('#qaDateL').textContent=st.date?fmtDate(st.date):'';SI('#qaDateB').classList.toggle('set',!!st.date);
     SI('#qaTimeL').textContent=st.time||'';SI('#qaTimeB').classList.toggle('set',!!st.time);
@@ -595,23 +642,23 @@ function quickAdd(pre={}){
     const l=listById(st.listId);SI('#qaListL').textContent=st.listId==='inbox'?'':l.name;SI('#qaListB').classList.toggle('set',st.listId!=='inbox');
     SI('#qaSend').disabled=!ti.value.trim();
   }
-  function add(keep){
+  function add(keepOpen){
     const v=ti.value.trim();if(!v)return;
     const p=parseQuick(v);
     const date=p.date||st.date,time=p.time||st.time;
     const tags=[...new Set([...st.tags,...p.tags])];
     S.tasks.push(newTask({title:p.title||v,notes:SI('#qaNote').value.trim(),listId:st.listId,priority:p.priority||st.priority,date:time&&!date?today():date,time,tags,remind:time?(S.settings.defRemind??0):null}));
     save();render();
-    if(keep){ti.value='';SI('#qaNote').value='';st.time='';st.priority=0;draw();ti.focus();toast('Задача добавлена')}
+    if(keepOpen){ti.value='';SI('#qaNote').value='';st.time='';st.priority=0;lastInp=ti;draw();ti.focus();toast('Задача добавлена')}
   }
   ti.oninput=draw;
   ti.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();add(true)}};
   SI('#qaNote').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();add(true)}};
-  SI('#qaDate').onchange=e=>{st.date=e.target.value;draw()};
-  SI('#qaTime').onchange=e=>{st.time=e.target.value;if(st.time&&!st.date)st.date=today();draw()};
-  SI('#qaList').onchange=e=>{st.listId=e.target.value;draw()};
-  SI('#qaPri').onclick=()=>{st.priority=[3,2,1,0][[0,3,2,1].indexOf(st.priority)];draw();toast('Приоритет: '+PRI[st.priority]);ti.focus()};
-  SI('#qaTag').onclick=()=>{const v=ti.value;ti.value=v+(v&&!v.endsWith(' ')?' ':'')+'#';ti.focus();ti.setSelectionRange(ti.value.length,ti.value.length);draw()};
+  SI('#qaDateB').onclick=()=>showPanel('date');
+  SI('#qaTimeB').onclick=()=>showPanel('time');
+  SI('#qaPri').onclick=()=>showPanel('pri');
+  SI('#qaListB').onclick=()=>showPanel('list');
+  SI('#qaTag').onclick=()=>{const v=ti.value;ti.value=v+(v&&!v.endsWith(' ')?' ':'')+'#';lastInp=ti;ti.focus();ti.setSelectionRange(ti.value.length,ti.value.length);draw()};
   SI('#qaExp').onclick=()=>{
     const p=parseQuick(ti.value.trim());
     const preset={title:p.title||ti.value.trim(),notes:SI('#qaNote').value,listId:st.listId,priority:p.priority||st.priority,date:p.date||st.date,time:p.time||st.time,tags:[...new Set([...st.tags,...p.tags])]};
@@ -945,7 +992,7 @@ function renderMore(){
     <p class="note">Веб-приложение присылает уведомления, пока оно открыто или недавно свёрнуто. Для важных дел нажмите в задаче «📅 В Календарь iPhone» — тогда напомнит системный Календарь, даже если приложение закрыто.</p></div>
    <div class="card sec mt"><h3>💾 Где хранятся данные</h3>
     <p class="note">Только на этом устройстве, в браузере. Никаких аккаунтов и серверов. ${storageOk?'':'<b style="color:var(--p3)">Сейчас хранилище недоступно — данные не сохранятся после закрытия.</b>'} Делайте резервную копию раз в пару недель: если долго не открывать веб-приложение, iOS может очистить его данные.</p></div>
-   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v1.3</p>`;
+   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v1.4</p>`;
   main.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{S.settings.theme=b.dataset.th;save();applyTheme();render()});
   const nb=$('#nBtn');if(nb)nb.onclick=async()=>{
     if(S.settings.notify&&Notification.permission==='granted'){S.settings.notify=false;save();render();return}
