@@ -148,7 +148,9 @@ button.ghead{width:calc(100% - 8px);text-align:left;padding:4px 0;font-family:in
 .dpGrid button{height:44px;display:grid;place-items:center;font-size:18px;font-weight:500}
 .dpGrid button span{width:40px;height:40px;border-radius:50%;display:grid;place-items:center}
 .dpGrid button.t span{color:var(--accent);font-weight:700}
+.dpGrid button.rep span{background:var(--accent-soft)}
 .dpGrid button.on span{background:var(--accent);color:#fff}
+.dpRows .srow.act,.dpRows .srow.act svg,.dpRows .srow.act .v{color:var(--accent)}
 .dpRows{padding:0 16px}
 .dpRows .srow svg{width:22px;height:22px;color:var(--muted);flex:none}
 .dpRows .srow .v svg{width:16px;height:16px}
@@ -916,6 +918,16 @@ function fmtLong(d,time){
   const y=dd.getFullYear()!==new Date().getFullYear()?' '+dd.getFullYear():'';
   return `${rel}, ${dd.getDate()} ${MONS[dd.getMonth()]}${y}${time?', '+time:''}`;
 }
+const WDACC=['понедельник','вторник','среду','четверг','пятницу','субботу','воскресенье'];
+function repLabel(st){
+  if(!st.date)return REPEATS[st.repeat];const d=pd(st.date);
+  switch(st.repeat){
+    case'weekly':return `Каждую неделю в ${WDACC[wdi(st.date)]}`.replace('в вторник','во вторник');
+    case'monthly':return `Каждый месяц, ${d.getDate()} числа`;
+    case'yearly':return `Каждый год, ${d.getDate()} ${MONG[d.getMonth()]}`;
+  }
+  return REPEATS[st.repeat];
+}
 function datePicker(init,onApply,onCancel){
   const st={date:init.date||'',time:init.time||'',remind:init.remind??null,repeat:init.repeat||''};
   let ref=pd(st.date||today());ref.setDate(1);
@@ -926,7 +938,8 @@ function datePicker(init,onApply,onCancel){
     const y=ref.getFullYear(),m=ref.getMonth();const off=(ref.getDay()+6)%7;const n=new Date(y,m+1,0).getDate();const t=today();
     let g=['П','В','С','Ч','П','С','В'].map(w=>`<div class="wd">${w}</div>`).join('');
     for(let i=0;i<off;i++)g+='<div></div>';
-    for(let i=1;i<=n;i++){const d=`${y}-${pad(m+1)}-${pad(i)}`;g+=`<button data-d="${d}" class="${d===st.date?'on':''} ${d===t?'t':''}"><span>${i}</span></button>`}
+    const rt={date:st.date,repeat:st.repeat,done:false};
+    for(let i=1;i<=n;i++){const d=`${y}-${pad(m+1)}-${pad(i)}`;const rep=st.repeat&&st.date&&d>st.date&&occursOn(rt,d);g+=`<button data-d="${d}" class="${d===st.date?'on':''} ${rep?'rep':''} ${d===t?'t':''}"><span>${i}</span></button>`}
     const remLabel=st.remind===null||st.remind===undefined?'Нет':(REMINDS[String(st.remind)]||'').replace('За ','за ');
     inn.innerHTML=`<div class="dpHead"><button id="dpCancel">Отмена</button><div class="dpTab"><span>Дата</span></div><button id="dpOk">Применить</button></div>
      <div class="dpBar"><button class="iconbtn" id="dpPrev">${I.left}</button><div class="ttl">${MON[m]}${y!==new Date().getFullYear()?' '+y:''}</div><button class="iconbtn" id="dpNext">${I.right}</button></div>
@@ -934,7 +947,7 @@ function datePicker(init,onApply,onCancel){
      <div class="fsec dpRows">
        <div class="srow">${I.clock}<span>Время</span><span class="v">${st.time||'Нет'}${st.time?'':I.ud}</span>${st.time?'<button class="clr" id="dpTimeX" aria-label="Убрать время">×</button>':''}<input type="time" id="dpTime" value="${st.time}"></div>
        <div class="srow">${I.bell}<span>Напоминание</span><span class="v" style="max-width:55%;overflow:hidden;text-overflow:ellipsis">${remLabel}${I.ud}</span><select id="dpRem">${sel(REMINDS,st.remind===null||st.remind===undefined?'':st.remind)}</select></div>
-       <div class="srow">${I.rep}<span>${st.repeat?'Повтор':'Не повторять'}</span><span class="v">${st.repeat?REPEATS[st.repeat]:'Нет'}${I.ud}</span><select id="dpRep">${sel(REPEATS,st.repeat)}</select></div>
+       <div class="srow ${st.repeat?'act':''}">${I.rep}<span>${st.repeat?'Повтор':'Не повторять'}</span><span class="v">${st.repeat?repLabel(st):'Нет'}${st.repeat?'':I.ud}</span>${st.repeat?'<button class="clr" id="dpRepX" aria-label="Убрать повтор" style="color:var(--accent)">×</button>':''}<select id="dpRep">${sel(REPEATS,st.repeat)}</select></div>
      </div>
      ${st.remind!==null&&st.remind!==undefined&&!st.time?'<p class="note" style="margin:0 4px">Чтобы сработало напоминание, укажите время.</p>':''}
      <button class="dpClear" id="dpClear">Очистить</button>`;
@@ -943,6 +956,7 @@ function datePicker(init,onApply,onCancel){
     inn.querySelector('#dpNext').onclick=()=>{ref.setMonth(ref.getMonth()+1);draw()};
     inn.querySelector('#dpTime').onchange=e=>{const had=!!st.time;st.time=e.target.value;if(st.time&&!st.date)st.date=today();if(st.time&&!had&&(st.remind===null||st.remind===undefined))st.remind=S.settings.defRemind??0;draw()};
     const tx=inn.querySelector('#dpTimeX');if(tx)tx.onclick=e=>{e.preventDefault();e.stopPropagation();st.time='';draw()};
+    const rx=inn.querySelector('#dpRepX');if(rx)rx.onclick=e=>{e.preventDefault();e.stopPropagation();st.repeat='';draw()};
     inn.querySelector('#dpRem').onchange=e=>{st.remind=e.target.value===''?null:+e.target.value;draw()};
     inn.querySelector('#dpRep').onchange=e=>{st.repeat=e.target.value;if(st.repeat&&!st.date)st.date=today();draw()};
     inn.querySelector('#dpCancel').onclick=()=>{close();onCancel&&onCancel()};
@@ -1287,7 +1301,7 @@ function renderMore(){
     <p class="note">Веб-приложение присылает уведомления, пока оно открыто или недавно свёрнуто. Для важных дел нажмите в задаче «📅 В Календарь iPhone» — тогда напомнит системный Календарь, даже если приложение закрыто.</p></div>
    <div class="card sec mt"><h3>💾 Где хранятся данные</h3>
     <p class="note">Только на этом устройстве, в браузере. Никаких аккаунтов и серверов. ${storageOk?'':'<b style="color:var(--p3)">Сейчас хранилище недоступно — данные не сохранятся после закрытия.</b>'} Делайте резервную копию раз в пару недель: если долго не открывать веб-приложение, iOS может очистить его данные.</p></div>
-   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v2.2</p>`;
+   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v2.3</p>`;
   main.querySelectorAll('[data-acc]').forEach(b=>b.onclick=()=>{S.settings.accent=b.dataset.acc;save();applyAccent();render()});
   main.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{S.settings.theme=b.dataset.th;save();applyTheme();render()});
   const nb=$('#nBtn');if(nb)nb.onclick=async()=>{
