@@ -84,6 +84,20 @@ nav#tabs button.on{color:var(--accent)}
 #sheet.on{transform:none}
 #sheet .in{background:var(--card);width:100%;max-width:720px;border-radius:18px 18px 0 0;max-height:88vh;overflow:auto;padding:10px 16px calc(var(--bot) + 18px);box-shadow:var(--shadow)}
 #sheetScrim{z-index:30}
+#sheet .in.compact{padding:12px 14px calc(var(--bot) + 10px);border-radius:16px 16px 0 0}
+#sheet.kb .in.compact{padding-bottom:10px}
+.qa-title{width:100%;border:0;background:transparent;outline:none;font-size:17px;font-weight:500;padding:4px 2px}
+.qa-note{width:100%;border:0;background:transparent;outline:none;font-size:14px;color:var(--muted);padding:4px 2px 8px}
+.qa-bar{display:flex;align-items:center;gap:2px}
+.qa-btn{position:relative;height:36px;min-width:36px;padding:0 7px;border-radius:9px;display:flex;align-items:center;gap:4px;color:var(--muted);font-size:13px;overflow:hidden;white-space:nowrap}
+.qa-btn.set{color:var(--accent)}
+.qa-btn svg{width:21px;height:21px;flex:none}
+.qa-btn input,.qa-btn select{position:absolute;inset:0;width:100%;height:100%;opacity:0;border:0;-webkit-appearance:none;appearance:none}
+.qa-btn:active{background:var(--line)}
+.qa-sp{flex:1}
+.qa-send{width:38px;height:38px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;flex:none;transition:opacity .15s}
+.qa-send:disabled{opacity:.35}
+.qa-send svg{width:20px;height:20px}
 .grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 10px}
 .shead{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .shead h2{font-size:18px;margin:0;flex:1}
@@ -246,6 +260,11 @@ const I={
  left:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',
  right:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
  close:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+ clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
+ flag:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"><path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5" fill="currentColor" fill-opacity=".15"/></svg>',
+ folder:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M3.5 7a2 2 0 0 1 2-2h4l2 2.5h7a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/></svg>',
+ expand:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg>',
+ send:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg>',
  note:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 6h14M5 12h14M5 18h9"/></svg>',
 };
 
@@ -478,8 +497,8 @@ $('#scrim').onclick=closeDrawer;
 
 /* ----- sheet ----- */
 let sheetClose=null;
-function openSheet(html,onClose){
-  const s=$('#sheet');s.querySelector('.in').innerHTML='<div class="grab"></div>'+html;s.querySelector('.in').scrollTop=0;
+function openSheet(html,onClose,compact){
+  const s=$('#sheet');const inn=s.querySelector('.in');inn.classList.toggle('compact',!!compact);inn.innerHTML=(compact?'':'<div class="grab"></div>')+html;s.querySelector('.in').scrollTop=0;
   s.classList.add('on');const sc=$('#sheetScrim');sc.style.opacity=1;sc.style.pointerEvents='auto';
   sheetClose=onClose||null;
 }
@@ -515,6 +534,65 @@ function confirmBox(title,text,ok,okLabel='Удалить'){
   <div class="actions"><span class="sp"></span><button class="btn sec" id="cno">Отмена</button><button class="btn" style="background:var(--p3)" id="cyes">${okLabel}</button></div>`);
   SI('#cno').onclick=()=>closeSheet();SI('#cyes').onclick=()=>{closeSheet(true);ok()};
 }
+
+/* ----- quick add (компактное окно над клавиатурой) ----- */
+function quickAdd(pre={}){
+  const st={date:pre.date||'',time:'',priority:0,listId:pre.listId||'inbox',tags:(pre.tags||[]).slice()};
+  const listOpts=S.lists.map(l=>`<option value="${l.id}" ${l.id===st.listId?'selected':''}>${esc(l.name)}</option>`).join('');
+  openSheet(`<input class="qa-title" id="qaTitle" placeholder="Что нужно сделать?" autocomplete="off" enterkeyhint="send">
+    <input class="qa-note" id="qaNote" placeholder="Описание" autocomplete="off">
+    <div class="qa-bar">
+      <label class="qa-btn" id="qaDateB">${I.cal}<span id="qaDateL"></span><input type="date" id="qaDate" value="${st.date}" aria-label="Дата"></label>
+      <label class="qa-btn" id="qaTimeB">${I.clock}<span id="qaTimeL"></span><input type="time" id="qaTime" aria-label="Время"></label>
+      <button class="qa-btn" id="qaPri" aria-label="Приоритет">${I.flag}</button>
+      <label class="qa-btn" id="qaListB">${I.folder}<span id="qaListL"></span><select id="qaList" aria-label="Список">${listOpts}</select></label>
+      <button class="qa-btn" id="qaTag" aria-label="Тег" style="font-size:19px;font-weight:600">#</button>
+      <button class="qa-btn" id="qaExp" aria-label="Подробнее">${I.expand}</button>
+      <span class="qa-sp"></span>
+      <button class="qa-send" id="qaSend" aria-label="Добавить" disabled>${I.send}</button>
+    </div>`,()=>{if(SI('#qaTitle').value.trim())add(false)},true);
+  const ti=SI('#qaTitle');
+  const PRI=['Без приоритета','Низкий','Средний','Высокий'];
+  function draw(){
+    SI('#qaDateL').textContent=st.date?fmtDate(st.date):'';SI('#qaDateB').classList.toggle('set',!!st.date);
+    SI('#qaTimeL').textContent=st.time||'';SI('#qaTimeB').classList.toggle('set',!!st.time);
+    const pb=SI('#qaPri');pb.style.color=st.priority?`var(--p${st.priority})`:'';
+    const l=listById(st.listId);SI('#qaListL').textContent=st.listId==='inbox'?'':l.name;SI('#qaListB').classList.toggle('set',st.listId!=='inbox');
+    SI('#qaSend').disabled=!ti.value.trim();
+  }
+  function add(keep){
+    const v=ti.value.trim();if(!v)return;
+    const p=parseQuick(v);
+    const date=p.date||st.date,time=p.time||st.time;
+    const tags=[...new Set([...st.tags,...p.tags])];
+    S.tasks.push(newTask({title:p.title||v,notes:SI('#qaNote').value.trim(),listId:st.listId,priority:p.priority||st.priority,date:time&&!date?today():date,time,tags,remind:time?(S.settings.defRemind??0):null}));
+    save();render();
+    if(keep){ti.value='';SI('#qaNote').value='';st.time='';st.priority=0;draw();ti.focus();toast('Задача добавлена')}
+  }
+  ti.oninput=draw;
+  ti.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();add(true)}};
+  SI('#qaNote').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();add(true)}};
+  SI('#qaDate').onchange=e=>{st.date=e.target.value;draw()};
+  SI('#qaTime').onchange=e=>{st.time=e.target.value;if(st.time&&!st.date)st.date=today();draw()};
+  SI('#qaList').onchange=e=>{st.listId=e.target.value;draw()};
+  SI('#qaPri').onclick=()=>{st.priority=[3,2,1,0][[0,3,2,1].indexOf(st.priority)];draw();toast('Приоритет: '+PRI[st.priority]);ti.focus()};
+  SI('#qaTag').onclick=()=>{const v=ti.value;ti.value=v+(v&&!v.endsWith(' ')?' ':'')+'#';ti.focus();ti.setSelectionRange(ti.value.length,ti.value.length);draw()};
+  SI('#qaExp').onclick=()=>{
+    const p=parseQuick(ti.value.trim());
+    const preset={title:p.title||ti.value.trim(),notes:SI('#qaNote').value,listId:st.listId,priority:p.priority||st.priority,date:p.date||st.date,time:p.time||st.time,tags:[...new Set([...st.tags,...p.tags])]};
+    if(preset.time)preset.remind=S.settings.defRemind??0;
+    closeSheet(true);openTask(null,preset)};
+  SI('#qaSend').onclick=()=>add(true);
+  draw();
+  ti.focus(); // синхронно в обработчике нажатия — так iOS сразу открывает клавиатуру
+}
+function fitKeyboard(){
+  const vv=window.visualViewport;if(!vv)return;
+  const off=Math.max(0,window.innerHeight-vv.height-vv.offsetTop);
+  const sh=$('#sheet');sh.style.bottom=off+'px';sh.classList.toggle('kb',off>60);
+  const inn=sh.querySelector('.in');inn.style.maxHeight=(vv.height*0.88)+'px';
+}
+if(window.visualViewport){visualViewport.addEventListener('resize',fitKeyboard);visualViewport.addEventListener('scroll',fitKeyboard)}
 
 /* ----- task editor ----- */
 function openTask(id,preset){
@@ -639,7 +717,7 @@ function renderCal(){
   $('#cPrev').onclick=()=>{if(U.calMode==='month'){const r=pd(U.calRef);r.setDate(1);r.setMonth(r.getMonth()-1);U.calRef=ds(r)}else U.calRef=addDays(U.calRef,-7);render()};
   $('#cNext').onclick=()=>{if(U.calMode==='month'){const r=pd(U.calRef);r.setDate(1);r.setMonth(r.getMonth()+1);U.calRef=ds(r)}else U.calRef=addDays(U.calRef,7);render()};
   $('#cToday').onclick=()=>{U.calSel=U.calRef=today();render()};
-  main.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>openTask(null,{date:b.dataset.add}));
+  main.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>quickAdd({date:b.dataset.add}));
   bindTaskEvents();
 }
 function dayAgenda(d,compact){
@@ -881,8 +959,8 @@ $('#fab').onclick=()=>{
   if(U.view==='tasks'){
     const pre={};if(!SMART[U.list]&&!U.list.startsWith('tag:'))pre.listId=U.list;
     if(U.list==='today'||U.list==='week')pre.date=today();if(U.list==='tomorrow')pre.date=addDays(today(),1);
-    if(U.list.startsWith('tag:'))pre.tags=[U.list.slice(4)];openTask(null,pre)}
-  else if(U.view==='cal')openTask(null,{date:U.calSel});
+    if(U.list.startsWith('tag:'))pre.tags=[U.list.slice(4)];quickAdd(pre)}
+  else if(U.view==='cal')quickAdd({date:U.calSel});
   else if(U.view==='habits')editHabit(null);
 };
 const TABS=[['tasks','Задачи',I.tasks],['cal','Календарь',I.cal],['habits','Привычки',I.habit],['focus','Фокус',I.focus],['more','Ещё',I.more]];
