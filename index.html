@@ -214,9 +214,10 @@ button.ghead{width:calc(100% - 8px);text-align:left;padding:4px 0;font-family:in
 .ym b{display:block;font-size:13px;margin:0 0 4px 2px;text-transform:capitalize}
 .ym.cur b{color:var(--accent)}
 .ym .g{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;font-size:8.5px;text-align:center;color:var(--text)}
-.ym .g i{font-style:normal;line-height:13px;border-radius:50%}
-.ym .g i.has{font-weight:800;color:var(--accent)}
-.ym .g i.t{background:var(--accent);color:#fff}
+.ym .g i{font-style:normal;line-height:13px;border-radius:50%;margin:0 .5px}
+.ym .g i.has{font-weight:700;color:var(--accent);background:var(--accent-soft);border-radius:3px;box-shadow:inset 0 0 0 1px var(--accent)}
+.ym .g i.t{background:var(--accent);color:#fff;box-shadow:none}
+.ym .g i.t.has{border-radius:3px}
 .mg{display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid var(--line);border-left:1px solid var(--line);background:var(--card);border-radius:10px;overflow:hidden}
 .mg .wdh{border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:4px 0}
 .mcell{min-height:78px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:3px 2px;text-align:left;display:flex;flex-direction:column;gap:2px;overflow:hidden;min-width:0}
@@ -1374,7 +1375,9 @@ function bigMonth(ref){
 }
 function yearView(y){
   const tdy=today();const has=new Set();
+  const rep=S.tasks.filter(t=>t.repeat&&!t.done&&t.date);
   S.tasks.forEach(t=>{if(t.date&&t.date.startsWith(String(y)))has.add(t.date)});
+  if(rep.length)for(let d=`${y}-01-01`;d<=`${y}-12-31`;d=addDays(d,1)){if(!has.has(d)&&rep.some(t=>occursOn(t,d)))has.add(d)}
   let h='<div class="yr">';
   for(let m=0;m<12;m++){
     const first=new Date(y,m,1);const off=(first.getDay()+6)%7;const n=new Date(y,m+1,0).getDate();
@@ -1590,7 +1593,7 @@ function renderMore(){
     <p class="note">Веб-приложение присылает уведомления, пока оно открыто или недавно свёрнуто. Для важных дел нажмите в задаче «📅 В Календарь iPhone» — тогда напомнит системный Календарь, даже если приложение закрыто.</p></div>
    <div class="card sec mt"><h3>💾 Где хранятся данные</h3>
     <p class="note">Только на этом устройстве, в браузере. Никаких аккаунтов и серверов. ${storageOk?'':'<b style="color:var(--p3)">Сейчас хранилище недоступно — данные не сохранятся после закрытия.</b>'} Делайте резервную копию раз в пару недель: если долго не открывать веб-приложение, iOS может очистить его данные.</p></div>
-   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v2.7</p>`;
+   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v2.8</p>`;
   main.querySelectorAll('[data-acc]').forEach(b=>b.onclick=()=>{S.settings.accent=b.dataset.acc;save();applyAccent();render()});
   main.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{S.settings.theme=b.dataset.th;save();applyTheme();render()});
   const nb=$('#nBtn');if(nb)nb.onclick=async()=>{
