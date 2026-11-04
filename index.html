@@ -1347,7 +1347,8 @@ function renderCal(){
   else{const n=mode==='week'?7:mode==='3day'?3:1;const s=mode==='week'?addDays(U.calRef,-wdi(U.calRef)):U.calRef;const e=addDays(s,n-1);const a=pd(s),bb=pd(e);
     const rel=s===tdy?'Сегодня':s===addDays(tdy,1)?'Завтра':s===addDays(tdy,-1)?'Вчера':`${a.getDate()} ${MONG[a.getMonth()]}, ${WD[wdi(s)].toLowerCase()}`;
     ttl=n===1?`<small style="display:block;font-size:12px;font-weight:500;color:var(--muted)">${MON[a.getMonth()]}${a.getFullYear()!==new Date().getFullYear()?' '+a.getFullYear():''}</small>${rel}`:(a.getMonth()===bb.getMonth()?`${a.getDate()}–${bb.getDate()} ${MONG[a.getMonth()]}`:`${a.getDate()} ${MONS[a.getMonth()]} – ${bb.getDate()} ${MONS[bb.getMonth()]}`)}
-  let h=`<div class="calhd"><button class="iconbtn" id="cPrev">${I.left}</button><div class="ttl" style="${mode==='day'||mode==='week'||mode==='3day'?'text-transform:none':''}">${ttl}</div><button class="btn sec sm" id="cToday">Сегодня</button><button class="iconbtn" id="cNext">${I.right}</button></div>`;
+  if(mode==='day'){const a=pd(U.calRef);$('#title').textContent=MON[a.getMonth()][0].toUpperCase()+MON[a.getMonth()].slice(1)+(a.getFullYear()!==new Date().getFullYear()?' '+a.getFullYear():'')}
+  let h=`<div class="calhd"><button class="iconbtn" id="cPrev">${I.left}</button><div class="ttl" style="${mode==='day'||mode==='week'||mode==='3day'?'text-transform:none':''}">${mode==='day'?'':ttl}</div><button class="btn sec sm" id="cToday">Сегодня</button><button class="iconbtn" id="cNext">${I.right}</button></div>`;
   if(mode==='year')h+=yearView(ref.getFullYear());
   else if(mode==='list'){h+=miniMonth(ref);h+=`<div class="agenda">${dayAgenda(U.calSel)}</div>`}
   else if(mode==='month'){h+=bigMonth(ref);h+=`<div class="agenda">${dayAgenda(U.calSel)}</div>`}
@@ -1641,7 +1642,7 @@ function renderMore(){
     <p class="note">Веб-приложение присылает уведомления, пока оно открыто или недавно свёрнуто. Для важных дел нажмите в задаче «📅 В Календарь iPhone» — тогда напомнит системный Календарь, даже если приложение закрыто.</p></div>
    <div class="card sec mt"><h3>💾 Где хранятся данные</h3>
     <p class="note">Только на этом устройстве, в браузере. Никаких аккаунтов и серверов. ${storageOk?'':'<b style="color:var(--p3)">Сейчас хранилище недоступно — данные не сохранятся после закрытия.</b>'} Делайте резервную копию раз в пару недель: если долго не открывать веб-приложение, iOS может очистить его данные.</p></div>
-   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v3.0</p>`;
+   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v3.1</p>`;
   main.querySelectorAll('[data-acc]').forEach(b=>b.onclick=()=>{S.settings.accent=b.dataset.acc;save();applyAccent();render()});
   main.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{S.settings.theme=b.dataset.th;save();applyTheme();render()});
   const nb=$('#nBtn');if(nb)nb.onclick=async()=>{
