@@ -49,7 +49,10 @@ nav#tabs button.on{color:var(--accent)}
 .group{margin-bottom:16px}
 .ghead{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--muted);margin:0 4px 6px;text-transform:uppercase;letter-spacing:.03em}
 .ghead.red{color:var(--p3)}
-.ghead button{margin-left:auto;font-size:12px;color:var(--accent);text-transform:none;font-weight:500}
+button.ghead{width:calc(100% - 8px);text-align:left;padding:4px 0;font-family:inherit}
+.ghead .chev{width:14px;height:14px;flex:none;transition:transform .2s;margin-left:-2px}
+.ghead.closed .chev{transform:rotate(-90deg)}
+.ghead .cnt{font-weight:500;opacity:.8}
 .task{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
 .task:last-child{border-bottom:0}
 .chk{flex:none;width:22px;height:22px;border-radius:6px;border:2px solid var(--p0);margin-top:1px;display:grid;place-items:center}
@@ -269,6 +272,7 @@ const I={
  rep:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l3 3-3 3"/><path d="M4 11V9a4 4 0 0 1 4-4h12M7 22l-3-3 3-3"/><path d="M20 13v2a4 4 0 0 1-4 4H4"/></svg>',
  bell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg>',
  sub:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 1.5-2M4 12l1 1 1.5-2"/></svg>',
+ chev:'<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
  left:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',
  right:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
  close:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
@@ -427,9 +431,11 @@ function taskRow(t,opts={}){
     <button class="chk p${t.priority||0} ${t.done?'on':''}" data-chk="${t.id}" aria-label="Выполнить"></button>
     <div class="tbody"><div class="ttitle">${esc(t.title)}</div>${meta.length?`<div class="meta">${meta.join('')}</div>`:''}</div></div>`;
 }
-function group(title,items,cls='',extra=''){
+function isCollapsed(key){const c=S.settings.collapsed||{};return key in c?c[key]:key==='Выполнено'}
+function group(title,items,cls=''){
   if(!items.length)return'';
-  return `<div class="group"><div class="ghead ${cls}">${title} <span>${items.length}</span>${extra}</div><div class="card">${items.map(x=>typeof x==='string'?x:taskRow(x)).join('')}</div></div>`;
+  const closed=isCollapsed(title);
+  return `<div class="group"><button class="ghead ${cls} ${closed?'closed':''}" data-g="${esc(title)}" aria-expanded="${!closed}">${I.chev}<span>${title}</span><span class="cnt">${items.length}</span></button>${closed?'':`<div class="card">${items.map(x=>typeof x==='string'?x:taskRow(x)).join('')}</div>`}</div>`;
 }
 function renderTasks(){
   $('#title').textContent=listTitle(U.list);
@@ -468,7 +474,7 @@ function renderTasks(){
     const doneF=U.list==='today'?(x=>x.done&&x.doneAt&&ds(new Date(x.doneAt))===tdy):(x=>x.done&&(U.list.startsWith('tag:')?x.tags.includes(U.list.slice(4)):x.listId===U.list));
     const dn=S.tasks.filter(doneF).sort((a,b)=>(b.doneAt||0)-(a.doneAt||0));
     if(dn.length){
-      html+=`<div class="group"><div class="ghead">Выполнено <span>${dn.length}</span><button id="toggleDone">${U.showDone?'Скрыть':'Показать'}</button></div>${U.showDone?`<div class="card">${dn.map(t=>taskRow(t)).join('')}</div>`:''}</div>`;
+      html+=group('Выполнено',dn);
     }
   }
   main.innerHTML=html;
@@ -480,9 +486,9 @@ function renderTasks(){
     let date=p.date;if(!date&&(U.list==='today'||U.list==='week'))date=today();if(!date&&U.list==='tomorrow')date=addDays(today(),1);
     S.tasks.push(newTask({title:p.title||v,listId,priority:p.priority,date,time:p.time,tags,remind:p.time?(S.settings.defRemind??0):null}));
     save();render();setTimeout(()=>{const i=$('#quickInp');i&&i.focus()},0);};
-  const td=$('#toggleDone');if(td)td.onclick=()=>{U.showDone=!U.showDone;render()};
 }
 function bindTaskEvents(){
+  main.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{const k=b.dataset.g;S.settings.collapsed=S.settings.collapsed||{};S.settings.collapsed[k]=!isCollapsed(k);save();render()});
   main.querySelectorAll('[data-chk]').forEach(b=>b.onclick=e=>{e.stopPropagation();toggleTask(b.dataset.chk)});
   main.querySelectorAll('[data-open]').forEach(r=>r.onclick=()=>openTask(r.dataset.open));
 }
@@ -992,7 +998,7 @@ function renderMore(){
     <p class="note">Веб-приложение присылает уведомления, пока оно открыто или недавно свёрнуто. Для важных дел нажмите в задаче «📅 В Календарь iPhone» — тогда напомнит системный Календарь, даже если приложение закрыто.</p></div>
    <div class="card sec mt"><h3>💾 Где хранятся данные</h3>
     <p class="note">Только на этом устройстве, в браузере. Никаких аккаунтов и серверов. ${storageOk?'':'<b style="color:var(--p3)">Сейчас хранилище недоступно — данные не сохранятся после закрытия.</b>'} Делайте резервную копию раз в пару недель: если долго не открывать веб-приложение, iOS может очистить его данные.</p></div>
-   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v1.5</p>`;
+   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v1.6</p>`;
   main.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{S.settings.theme=b.dataset.th;save();applyTheme();render()});
   const nb=$('#nBtn');if(nb)nb.onclick=async()=>{
     if(S.settings.notify&&Notification.permission==='granted'){S.settings.notify=false;save();render();return}
