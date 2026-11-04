@@ -131,6 +131,46 @@ button.ghead{width:calc(100% - 8px);text-align:left;padding:4px 0;font-family:in
 .srow .v{margin-left:auto;color:var(--muted);display:flex;align-items:center;gap:4px;white-space:nowrap;font-size:16px}
 .srow .v svg{width:16px;height:16px}
 .srow select{position:absolute;inset:0;opacity:0;width:100%;-webkit-appearance:none;appearance:none;border:0}
+/* date picker */
+#dp{position:fixed;inset:0;z-index:40;pointer-events:none}
+#dp .dpScrim{position:absolute;inset:0;background:rgba(0,0,0,.4);opacity:0;transition:opacity .2s}
+#dp .dpIn{position:absolute;left:0;right:0;bottom:0;margin:0 auto;max-width:720px;background:var(--bg);border-radius:18px 18px 0 0;max-height:94vh;overflow-y:auto;overflow-x:hidden;padding:0 16px calc(var(--bot) + 16px);transform:translateY(105%);transition:transform .25s;overscroll-behavior:contain}
+#dp.on{pointer-events:auto}#dp.on .dpScrim{opacity:1}#dp.on .dpIn{transform:none}
+.dpHead{display:flex;align-items:center;padding:16px 0 10px;position:sticky;top:0;background:var(--bg);z-index:3}
+.dpHead button{color:var(--accent);font-size:17px;min-width:96px;text-align:left}
+.dpHead button:last-child{text-align:right;font-weight:600}
+.dpHead .dpTab{flex:1;text-align:center}
+.dpHead .dpTab span{display:inline-block;padding:7px 16px;border-radius:18px;background:var(--accent-soft);color:var(--accent);font-weight:600}
+.dpBar{display:flex;align-items:center;margin:4px 0}
+.dpBar .ttl{flex:1;text-align:center;font-weight:700;font-size:18px}
+.dpGrid{display:grid;grid-template-columns:repeat(7,1fr);row-gap:2px;margin-bottom:14px}
+.dpGrid .wd{text-align:center;font-size:14px;color:var(--muted);padding:8px 0}
+.dpGrid button{height:44px;display:grid;place-items:center;font-size:18px;font-weight:500}
+.dpGrid button span{width:40px;height:40px;border-radius:50%;display:grid;place-items:center}
+.dpGrid button.t span{color:var(--accent);font-weight:700}
+.dpGrid button.on span{background:var(--accent);color:#fff}
+.dpRows{padding:0 16px}
+.dpRows .srow svg{width:22px;height:22px;color:var(--muted);flex:none}
+.dpRows .srow .v svg{width:16px;height:16px}
+.dpRows .srow input,.dpRows .srow select{position:absolute;inset:0;opacity:0;width:100%;height:100%;-webkit-appearance:none;appearance:none;border:0;z-index:1}
+.dpRows .srow .clr{position:relative;z-index:2;color:var(--muted);font-size:22px;line-height:1;padding:0 2px 0 6px}
+.dpClear{display:block;margin:22px auto 6px;color:var(--p3);font-size:17px}
+/* task editor */
+.edTop{display:flex;align-items:center;gap:6px;margin:4px 0 6px}
+.edList{position:relative;display:flex;align-items:center;gap:7px;font-size:17px;font-weight:500;padding:6px 4px;max-width:60%}
+.edList span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.edList .ud{width:14px;height:14px;color:var(--muted);flex:none}
+.edList select{position:absolute;inset:0;opacity:0;width:100%;-webkit-appearance:none;appearance:none;border:0}
+.edPanel{display:none;gap:6px;flex-wrap:wrap;margin:2px 0 10px}.edPanel.on{display:flex}
+.edDateRow{display:flex;align-items:center;gap:12px;margin:10px 0 6px}
+.edDate{font-size:17px;color:var(--accent);display:flex;align-items:center;gap:6px;text-align:left}
+.edDate.red{color:var(--p3)}.edDate.none{color:var(--muted)}
+.edDate svg{width:15px;height:15px;opacity:.8}
+.edTitle{width:100%;border:0;background:transparent;outline:none;resize:none;font-size:23px;font-weight:600;line-height:1.3;padding:8px 0 4px;overflow:hidden}
+.edNotes{width:100%;border:0;background:transparent;outline:none;resize:none;font-size:16px;line-height:1.45;padding:4px 0;min-height:60px;overflow:hidden;color:var(--text)}
+.edBar{position:sticky;bottom:calc(-1 * (var(--bot) + 18px));background:var(--card);display:flex;align-items:center;gap:4px;padding:10px 0 calc(var(--bot) + 18px);margin-bottom:calc(-1 * (var(--bot) + 18px));border-top:1px solid var(--line);margin-top:16px}
+.edBar .iconbtn{color:var(--muted)}
+.edBar .iconbtn.on{color:var(--accent)}
 /* kanban */
 .kanban{display:flex;gap:12px;overflow-x:auto;margin:0 -16px;padding:0 16px 10px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
 .kcol{flex:0 0 82%;max-width:320px;scroll-snap-align:start}
@@ -295,6 +335,7 @@ textarea.inp{min-height:70px;resize:vertical}
 <aside id="drawer"></aside>
 <div id="sheetScrim" class="" style="position:fixed;inset:0;background:rgba(0,0,0,.35);opacity:0;pointer-events:none;transition:opacity .2s"></div>
 <div id="sheet"><div class="in"></div></div>
+<div id="dp"><div class="dpScrim"></div><div class="dpIn"></div></div>
 <div id="toast"></div>
 
 <script>
@@ -309,6 +350,7 @@ const addDays=(s,n)=>{const d=pd(s);d.setDate(d.getDate()+n);return ds(d)};
 const today=()=>ds(new Date());
 const wdi=s=>(pd(s).getDay()+6)%7; // 0 = Пн
 const MON=['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
+const MONS=['янв.','февр.','мар.','апр.','мая','июн.','июл.','авг.','сент.','окт.','нояб.','дек.'];
 const MONG=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
 const WD=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const WDL=['понедельник','вторник','среда','четверг','пятница','суббота','воскресенье'];
@@ -345,6 +387,8 @@ const I={
  bell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg>',
  sub:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 1.5-2M4 12l1 1 1.5-2"/></svg>',
  chev:'<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
+ ud:'<svg class="ud" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 9l4-4 4 4M8 15l4 4 4-4"/></svg>',
+ attach:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M21 11.5l-8.6 8.6a5.5 5.5 0 0 1-7.8-7.8l8.6-8.6a3.7 3.7 0 0 1 5.2 5.2l-8.6 8.6a1.8 1.8 0 0 1-2.6-2.6l7.9-7.9"/></svg>',
  left:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',
  right:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
  close:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
@@ -788,10 +832,10 @@ function quickAdd(pre={}){
     if(kind==='date'){
       const nm=addDays(t,(7-wdi(t))%7||7);
       html=[chip(t,'Сегодня',st.date===t),chip(addDays(t,1),'Завтра',st.date===addDays(t,1)),chip(addDays(t,2),'Послезавтра',st.date===addDays(t,2)),chip(nm,'След. пн',st.date===nm),chip('','Без даты',!st.date)].join('')
-        +`<label class="chip qa-other">Другая…<input type="date" id="qaDateX" value="${st.date}"></label>`;
+        +chip('pick','Другая…',false);
     }else if(kind==='time'){
       html=['09:00','12:00','15:00','18:00','21:00'].map(x=>chip(x,x,st.time===x)).join('')+chip('','Без времени',!st.time)
-        +`<label class="chip qa-other">Другое…<input type="time" id="qaTimeX" value="${st.time}"></label>`;
+        +chip('pick','Другое…',false);
     }else if(kind==='pri'){
       html=[3,2,1,0].map(p=>chip(p,`<span style="color:${p?`var(--p${p})`:'var(--muted)'}">⚑</span> ${PRI[p]}`,st.priority===p)).join('');
     }else if(kind==='list'){
@@ -809,6 +853,9 @@ function quickAdd(pre={}){
         if(v==='note'){const n=SI('#qaNote');n.classList.add('on');lastInp=n;n.focus();return}
         if(v==='exp'){expand();return}
       }
+      if(v==='pick'&&(kind==='date'||kind==='time')){
+        panel='';pn.innerHTML='';pn.classList.remove('on');SA('.qa-bar .qa-btn').forEach(b=>b.classList.remove('open'));
+        datePicker({date:st.date,time:st.time,remind:st.remind??null,repeat:st.repeat||''},r=>{st.date=r.date;st.time=r.time;st.remind=r.remind;st.repeat=r.repeat;draw();back()},back);return}
       if(kind==='date')st.date=v;
       else if(kind==='time'){st.time=v;if(v&&!st.date)st.date=today()}
       else if(kind==='pri')st.priority=+v;
@@ -832,7 +879,7 @@ function quickAdd(pre={}){
     const p=parseQuick(v);
     const date=p.date||st.date,time=p.time||st.time;
     const tags=[...new Set([...st.tags,...p.tags])];
-    S.tasks.push(newTask({title:p.title||v,notes:SI('#qaNote').value.trim(),listId:st.listId,priority:p.priority||st.priority,date:time&&!date?today():date,time,tags,remind:time?(S.settings.defRemind??0):null}));
+    S.tasks.push(newTask({title:p.title||v,notes:SI('#qaNote').value.trim(),listId:st.listId,priority:p.priority||st.priority,date:time&&!date?today():date,time,tags,repeat:st.repeat||'',remind:st.remind!==undefined&&st.remind!==null?st.remind:(time?(S.settings.defRemind??0):null)}));
     save();render();
     if(keepOpen){closeSheet(true);toast('Задача добавлена')}
   }
@@ -846,8 +893,8 @@ function quickAdd(pre={}){
   SI('#qaTag').onclick=()=>{const v=ti.value;ti.value=v+(v&&!v.endsWith(' ')?' ':'')+'#';lastInp=ti;ti.focus();ti.setSelectionRange(ti.value.length,ti.value.length);draw()};
   function expand(){
     const p=parseQuick(ti.value.trim());
-    const preset={title:p.title||ti.value.trim(),notes:SI('#qaNote').value,listId:st.listId,priority:p.priority||st.priority,date:p.date||st.date,time:p.time||st.time,tags:[...new Set([...st.tags,...p.tags])]};
-    if(preset.time)preset.remind=S.settings.defRemind??0;
+    const preset={title:p.title||ti.value.trim(),notes:SI('#qaNote').value,listId:st.listId,priority:p.priority||st.priority,date:p.date||st.date,time:p.time||st.time,repeat:st.repeat||'',tags:[...new Set([...st.tags,...p.tags])]};
+    preset.remind=st.remind!==undefined&&st.remind!==null?st.remind:(preset.time?S.settings.defRemind??0:null);
     closeSheet(true);openTask(null,preset)}
   SI('#qaSend').onclick=()=>add(true);
   draw();
@@ -862,29 +909,102 @@ function fitKeyboard(){
 if(window.visualViewport){visualViewport.addEventListener('resize',fitKeyboard);visualViewport.addEventListener('scroll',fitKeyboard)}
 
 /* ----- task editor ----- */
+/* ----- выбор даты (как в TickTick) ----- */
+function fmtLong(d,time){
+  if(!d)return time||'';
+  const t=today(),dd=pd(d);const rel=d===t?'Сегодня':d===addDays(t,1)?'Завтра':d===addDays(t,-1)?'Вчера':WD[wdi(d)];
+  const y=dd.getFullYear()!==new Date().getFullYear()?' '+dd.getFullYear():'';
+  return `${rel}, ${dd.getDate()} ${MONS[dd.getMonth()]}${y}${time?', '+time:''}`;
+}
+function datePicker(init,onApply,onCancel){
+  const st={date:init.date||'',time:init.time||'',remind:init.remind??null,repeat:init.repeat||''};
+  let ref=pd(st.date||today());ref.setDate(1);
+  const dp=$('#dp'),inn=dp.querySelector('.dpIn');
+  if(document.activeElement)document.activeElement.blur();
+  const sel=(obj,val)=>Object.entries(obj).map(([k,v])=>`<option value="${k}" ${String(val??'')===k?'selected':''}>${v}</option>`).join('');
+  function draw(){
+    const y=ref.getFullYear(),m=ref.getMonth();const off=(ref.getDay()+6)%7;const n=new Date(y,m+1,0).getDate();const t=today();
+    let g=['П','В','С','Ч','П','С','В'].map(w=>`<div class="wd">${w}</div>`).join('');
+    for(let i=0;i<off;i++)g+='<div></div>';
+    for(let i=1;i<=n;i++){const d=`${y}-${pad(m+1)}-${pad(i)}`;g+=`<button data-d="${d}" class="${d===st.date?'on':''} ${d===t?'t':''}"><span>${i}</span></button>`}
+    const remLabel=st.remind===null||st.remind===undefined?'Нет':(REMINDS[String(st.remind)]||'').replace('За ','за ');
+    inn.innerHTML=`<div class="dpHead"><button id="dpCancel">Отмена</button><div class="dpTab"><span>Дата</span></div><button id="dpOk">Применить</button></div>
+     <div class="dpBar"><button class="iconbtn" id="dpPrev">${I.left}</button><div class="ttl">${MON[m]}${y!==new Date().getFullYear()?' '+y:''}</div><button class="iconbtn" id="dpNext">${I.right}</button></div>
+     <div class="dpGrid">${g}</div>
+     <div class="fsec dpRows">
+       <div class="srow">${I.clock}<span>Время</span><span class="v">${st.time||'Нет'}${st.time?'':I.ud}</span>${st.time?'<button class="clr" id="dpTimeX" aria-label="Убрать время">×</button>':''}<input type="time" id="dpTime" value="${st.time}"></div>
+       <div class="srow">${I.bell}<span>Напоминание</span><span class="v" style="max-width:55%;overflow:hidden;text-overflow:ellipsis">${remLabel}${I.ud}</span><select id="dpRem">${sel(REMINDS,st.remind===null||st.remind===undefined?'':st.remind)}</select></div>
+       <div class="srow">${I.rep}<span>${st.repeat?'Повтор':'Не повторять'}</span><span class="v">${st.repeat?REPEATS[st.repeat]:'Нет'}${I.ud}</span><select id="dpRep">${sel(REPEATS,st.repeat)}</select></div>
+     </div>
+     ${st.remind!==null&&st.remind!==undefined&&!st.time?'<p class="note" style="margin:0 4px">Чтобы сработало напоминание, укажите время.</p>':''}
+     <button class="dpClear" id="dpClear">Очистить</button>`;
+    inn.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{st.date=b.dataset.d;draw()});
+    inn.querySelector('#dpPrev').onclick=()=>{ref.setMonth(ref.getMonth()-1);draw()};
+    inn.querySelector('#dpNext').onclick=()=>{ref.setMonth(ref.getMonth()+1);draw()};
+    inn.querySelector('#dpTime').onchange=e=>{const had=!!st.time;st.time=e.target.value;if(st.time&&!st.date)st.date=today();if(st.time&&!had&&(st.remind===null||st.remind===undefined))st.remind=S.settings.defRemind??0;draw()};
+    const tx=inn.querySelector('#dpTimeX');if(tx)tx.onclick=e=>{e.preventDefault();e.stopPropagation();st.time='';draw()};
+    inn.querySelector('#dpRem').onchange=e=>{st.remind=e.target.value===''?null:+e.target.value;draw()};
+    inn.querySelector('#dpRep').onchange=e=>{st.repeat=e.target.value;if(st.repeat&&!st.date)st.date=today();draw()};
+    inn.querySelector('#dpCancel').onclick=()=>{close();onCancel&&onCancel()};
+    inn.querySelector('#dpOk').onclick=()=>{close();onApply(st)};
+    inn.querySelector('#dpClear').onclick=()=>{close();onApply({date:'',time:'',remind:null,repeat:''})};
+  }
+  function close(){dp.classList.remove('on')}
+  dp.querySelector('.dpScrim').onclick=()=>{close();onCancel&&onCancel()};
+  draw();inn.scrollTop=0;dp.classList.add('on');
+}
+
+/* ----- карточка задачи (как в TickTick) ----- */
 function openTask(id,preset){
   const isNew=!id;
   const orig=id?S.tasks.find(t=>t.id===id):null;if(id&&!orig)return;
   const t=isNew?newTask(preset||{}):JSON.parse(JSON.stringify(orig));
   const listOpts=S.lists.map(l=>`<option value="${l.id}" ${l.id===t.listId?'selected':''}>${esc((l.emoji?l.emoji+' ':'')+l.name)}</option>`).join('');
-  const sel=(obj,val)=>Object.entries(obj).map(([k,v])=>`<option value="${k}" ${String(val??'')===k?'selected':''}>${v}</option>`).join('');
   openSheet(`
-    <div class="shead"><button class="chk p${t.priority} ${t.done?'on':''}" id="edChk" style="width:24px;height:24px"></button><span class="sp" style="flex:1"></span>
-      <button class="iconbtn" id="edClose" aria-label="Закрыть">${I.close}</button></div>
-    <input class="titleinp" id="edTitle" placeholder="Что нужно сделать?" value="${esc(t.title)}">
-    <div class="field"><textarea class="inp" id="edNotes" placeholder="Заметки">${esc(t.notes)}</textarea></div>
-    <div class="row"><div class="field"><label>Дата</label><input type="date" class="inp" id="edDate" value="${t.date}"></div>
-      <div class="field"><label>Время</label><input type="time" class="inp" id="edTime" value="${t.time}"></div></div>
-    <div class="row"><div class="field"><label>Напоминание</label><select class="inp" id="edRemind">${sel(REMINDS,t.remind===null||t.remind===undefined?'':t.remind)}</select></div>
-      <div class="field"><label>Повтор</label><select class="inp" id="edRepeat">${sel(REPEATS,t.repeat)}</select></div></div>
-    <div class="field"><label>Приоритет</label><div class="seg" id="edPri">${['Нет','Низкий','Средний','Высокий'].map((n,i)=>`<button data-p="${i}" class="${t.priority===i?'on':''}" style="${i?`color:var(--p${i})`:''}">${n}</button>`).join('')}</div></div>
-    <div class="row"><div class="field"><label>Список</label><select class="inp" id="edList">${listOpts}</select></div>
-      <div class="field"><label>Теги (через запятую)</label><input class="inp" id="edTags" value="${esc(t.tags.join(', '))}" placeholder="дом, срочно"></div></div>
-    <div class="field"><label>Подзадачи</label><div id="edSubs"></div>
-      <div class="sub"><span style="width:20px;text-align:center;color:var(--muted)">+</span><input type="text" id="edSubNew" placeholder="Добавить подзадачу" enterkeyhint="done"></div></div>
+    <div class="edTop"><label class="edList" id="edListL"><span id="edListN"></span>${I.ud}<select id="edList">${listOpts}</select></label>
+      <span style="flex:1"></span>
+      <button class="iconbtn" id="edFlag" aria-label="Приоритет">${I.flag}</button>
+      <button class="iconbtn" id="edMore" aria-label="Ещё" style="font-size:22px">⋯</button></div>
+    <div class="edPanel" id="edPanel"></div>
+    <div class="edDateRow"><button class="chk" id="edChk" style="width:24px;height:24px"></button><button class="edDate" id="edDateB"></button></div>
+    <textarea class="edTitle" id="edTitle" rows="1" placeholder="Что нужно сделать?">${esc(t.title)}</textarea>
+    <textarea class="edNotes" id="edNotes" rows="2" placeholder="Описание">${esc(t.notes)}</textarea>
+    <div id="edSubs"></div>
+    <div class="sub" id="edSubAdd" style="display:${t.subtasks.length?'flex':'none'}"><span style="width:20px;text-align:center;color:var(--muted)">+</span><input type="text" id="edSubNew" placeholder="Добавить подзадачу" enterkeyhint="done"></div>
+    <div class="field" id="edTagsF" style="display:${t.tags.length?'block':'none'}"><input class="inp" id="edTags" value="${esc(t.tags.map(g=>'#'+g).join(' '))}" placeholder="#дом #срочно"></div>
     <div id="edRemHint" class="note"></div>
-    <div class="actions">${isNew?'':'<button class="btn danger" id="edDel">Удалить</button>'}<button class="btn sec sm" id="edIcs">📅 В Календарь iPhone</button><span class="sp"></span><button class="btn" id="edSave">Готово</button></div>`,
+    <div class="edBar"><button class="iconbtn ${t.tags.length?'on':''}" id="edTagB" aria-label="Теги">${I.tag}</button><button class="iconbtn ${t.subtasks.length?'on':''}" id="edSubB" aria-label="Подзадачи">${I.sub}</button><span style="flex:1"></span><button class="btn sm" id="edSave">Готово</button></div>`,
     ()=>commit());
+  const grow=el=>{el.style.height='auto';el.style.height=el.scrollHeight+'px'};
+  ['#edTitle','#edNotes'].forEach(s=>{const el=SI(s);el.oninput=()=>grow(el);setTimeout(()=>grow(el),0)});
+  SI('#edTitle').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();SI('#edNotes').focus()}};
+  function drawHead(){
+    const l=listById(SI('#edList').value);SI('#edListN').innerHTML=(l.emoji?`<span class="lem">${esc(l.emoji)}</span> `:'')+esc(l.name);
+    SI('#edFlag').style.color=t.priority?`var(--p${t.priority})`:'';
+    SI('#edChk').className=`chk p${t.priority} ${t.done?'on':''}`;
+    const b=SI('#edDateB');const over=t.date&&!t.done&&t.date<today();
+    b.className='edDate'+(over?' red':'')+(t.date||t.time?'':' none');
+    b.innerHTML=(t.date||t.time?esc(fmtLong(t.date,t.time)):'Дата и напоминание')+(t.remind!==null&&t.remind!==undefined&&t.time?I.bell:'')+(t.repeat?I.rep:'');
+    const hnt=SI('#edRemHint');
+    hnt.textContent=(t.remind!==null&&t.remind!==undefined&&t.time)?(S.settings.notify?'Уведомление придёт, пока приложение открыто или недавно свёрнуто. Для надёжности: ⋯ → «В Календарь iPhone».':'Уведомления выключены — включите во вкладке «Ещё» или добавьте задачу в Календарь iPhone через ⋯.'):'';
+  }
+  drawHead();
+  SI('#edList').onchange=drawHead;
+  SI('#edDateB').onclick=()=>datePicker(t,st=>{t.date=st.date;t.time=st.time;t.remind=st.remind;t.repeat=st.repeat;drawHead()});
+  const pn=SI('#edPanel');let panel='';
+  function showPanel(kind){
+    panel=panel===kind?'':kind;if(!panel){pn.classList.remove('on');pn.innerHTML='';return}
+    if(kind==='pri')pn.innerHTML=[3,2,1,0].map(p=>`<button class="chip ${t.priority===p?'on':''}" data-p="${p}"><span style="color:${p?`var(--p${p})`:'var(--muted)'}">⚑</span> ${['Без приоритета','Низкий','Средний','Высокий'][p]}</button>`).join('');
+    else pn.innerHTML=`<button class="chip" data-a="ics">📅 В Календарь iPhone</button>${isNew?'':'<button class="chip" data-a="del" style="color:var(--p3)">🗑 Удалить</button>'}`;
+    pn.classList.add('on');
+    pn.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{t.priority=+b.dataset.p;showPanel('');drawHead()});
+    pn.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{
+      if(b.dataset.a==='ics'){read();if(!t.title){toast('Сначала введите название');return}if(!t.date){toast('Сначала выберите дату');return}exportICS(t)}
+      else confirmBox('Удалить задачу?','',()=>{S.tasks=S.tasks.filter(x=>x.id!==id);save();render();toast('Задача удалена')});
+    });
+  }
+  SI('#edFlag').onclick=()=>showPanel('pri');
+  SI('#edMore').onclick=()=>showPanel('more');
   function drawSubs(){
     SI('#edSubs').innerHTML=t.subtasks.map(s=>`<div class="sub"><button class="chk ${s.done?'on':''}" data-sc="${s.id}" style="width:20px;height:20px"></button><input type="text" data-st="${s.id}" value="${esc(s.title)}"><button class="x" data-sx="${s.id}">×</button></div>`).join('');
     SA('[data-sc]').forEach(b=>b.onclick=()=>{const s=t.subtasks.find(x=>x.id===b.dataset.sc);s.done=!s.done;drawSubs()});
@@ -892,42 +1012,31 @@ function openTask(id,preset){
     SA('[data-sx]').forEach(b=>b.onclick=()=>{t.subtasks=t.subtasks.filter(x=>x.id!==b.dataset.sx);drawSubs()});
   }
   drawSubs();
-  function remHint(){
-    const r=SI('#edRemind').value;const h=SI('#edRemHint');
-    if(r!==''&&!SI('#edTime').value)h.textContent='Чтобы напоминание сработало, укажите время.';
-    else if(r!=='')h.textContent=S.settings.notify?'Уведомление придёт, пока приложение открыто или недавно свёрнуто. Для 100% надёжности добавьте задачу в Календарь iPhone кнопкой ниже.':'Уведомления выключены — включите их во вкладке «Ещё». Или добавьте задачу в Календарь iPhone.';
-    else h.textContent='';
-  }
-  SI('#edRemind').onchange=remHint;SI('#edTime').onchange=()=>{if(SI('#edTime').value&&SI('#edRemind').value===''&&isNew)SI('#edRemind').value=String(S.settings.defRemind??0);if(SI('#edTime').value&&!SI('#edDate').value)SI('#edDate').value=today();remHint()};remHint();
   SI('#edSubNew').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();const v=e.target.value.trim();if(v){t.subtasks.push({id:uid(),title:v,done:false});e.target.value='';drawSubs()}}};
-  SA('#edPri button').forEach(b=>b.onclick=()=>{t.priority=+b.dataset.p;SA('#edPri button').forEach(x=>x.classList.toggle('on',x===b));SI('#edChk').className=`chk p${t.priority} ${t.done?'on':''}`});
-  SI('#edChk').onclick=()=>{t.done=!t.done;SI('#edChk').classList.toggle('on',t.done)};
-  SI('#edClose').onclick=()=>closeSheet();
+  SI('#edSubB').onclick=()=>{SI('#edSubAdd').style.display='flex';SI('#edSubB').classList.add('on');SI('#edSubNew').focus()};
+  SI('#edTagB').onclick=()=>{SI('#edTagsF').style.display='block';SI('#edTagB').classList.add('on');const i=SI('#edTags');if(!i.value)i.value='#';i.focus();i.setSelectionRange(i.value.length,i.value.length)};
+  SI('#edChk').onclick=()=>{t.done=!t.done;drawHead()};
   SI('#edSave').onclick=()=>closeSheet();
-  if(!isNew)SI('#edDel').onclick=()=>{closeSheet(true);S.tasks=S.tasks.filter(x=>x.id!==id);save();render();toast('Задача удалена')};
-  SI('#edIcs').onclick=()=>{read();if(!t.title.trim()){toast('Сначала введите название');return}if(!t.date){toast('Укажите дату');return}exportICS(t)};
   function read(){
-    t.title=SI('#edTitle').value.trim();t.notes=SI('#edNotes').value;t.date=SI('#edDate').value;t.time=SI('#edTime').value;
-    const r=SI('#edRemind').value;t.remind=r===''?null:+r;t.repeat=SI('#edRepeat').value;t.listId=SI('#edList').value;
-    t.tags=SI('#edTags').value.split(',').map(x=>x.trim().replace(/^#/,'').toLowerCase()).filter(Boolean);
+    t.title=SI('#edTitle').value.replace(/\n/g,' ').trim();t.notes=SI('#edNotes').value;t.listId=SI('#edList').value;
+    t.tags=[...new Set(SI('#edTags').value.split(/[\s,]+/).map(x=>x.trim().replace(/^#/,'').toLowerCase()).filter(Boolean))];
     const nv=SI('#edSubNew').value.trim();if(nv){t.subtasks.push({id:uid(),title:nv,done:false});SI('#edSubNew').value=''}
     t.subtasks=t.subtasks.filter(s=>s.title.trim());
     if(t.repeat&&!t.date)t.date=today();
   }
   function commit(){
+    if($('#dp').classList.contains('on'))$('#dp').classList.remove('on');
     read();
-    if(!t.title){if(!isNew){/* пустое имя — оставляем старое */t.title=orig.title}else return}
+    if(!t.title){if(!isNew){t.title=orig.title}else return}
     if(isNew){S.tasks.push(t)}else{
       const changedWhen=orig.date!==t.date||orig.time!==t.time||orig.remind!==t.remind;
       if(changedWhen)t.notified=false;
-      if(orig.done!==t.done){
-        Object.assign(orig,t,{done:orig.done});save();toggleTask(orig.id);return;
-      }
+      if(orig.done!==t.done){Object.assign(orig,t,{done:orig.done});save();toggleTask(orig.id);return}
       Object.assign(orig,t);
     }
     save();render();
   }
-  if(isNew)setTimeout(()=>SI('#edTitle')&&SI('#edTitle').focus(),250);
+  if(isNew)SI('#edTitle').focus();
 }
 
 /* ----- ICS export ----- */
@@ -1178,7 +1287,7 @@ function renderMore(){
     <p class="note">Веб-приложение присылает уведомления, пока оно открыто или недавно свёрнуто. Для важных дел нажмите в задаче «📅 В Календарь iPhone» — тогда напомнит системный Календарь, даже если приложение закрыто.</p></div>
    <div class="card sec mt"><h3>💾 Где хранятся данные</h3>
     <p class="note">Только на этом устройстве, в браузере. Никаких аккаунтов и серверов. ${storageOk?'':'<b style="color:var(--p3)">Сейчас хранилище недоступно — данные не сохранятся после закрытия.</b>'} Делайте резервную копию раз в пару недель: если долго не открывать веб-приложение, iOS может очистить его данные.</p></div>
-   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v2.1</p>`;
+   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v2.2</p>`;
   main.querySelectorAll('[data-acc]').forEach(b=>b.onclick=()=>{S.settings.accent=b.dataset.acc;save();applyAccent();render()});
   main.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{S.settings.theme=b.dataset.th;save();applyTheme();render()});
   const nb=$('#nBtn');if(nb)nb.onclick=async()=>{
@@ -1235,7 +1344,7 @@ $('#fab').onclick=()=>{
 const TABS=[['tasks','Задачи',I.tasks],['cal','Календарь',I.cal],['habits','Привычки',I.habit],['focus','Фокус',I.focus],['more','Ещё',I.more]];
 $('#tabs .wrap').innerHTML=TABS.map(([v,n,ic])=>`<button data-v="${v}">${ic}<span>${n}</span></button>`).join('');
 document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{U.view=b.dataset.v;if($('#sheet').classList.contains('on'))closeSheet();window.scrollTo(0,0);render()});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($('#sheet').classList.contains('on'))closeSheet();else closeDrawer()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($('#dp').classList.contains('on')){$('#dp').classList.remove('on');return}if($('#sheet').classList.contains('on'))closeSheet();else closeDrawer()}});
 
 // timer: если таймер «истёк» пока приложение было закрыто
 if(S.timer.running&&timerLeft()<=0)finishTimer(true);
