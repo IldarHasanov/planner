@@ -264,6 +264,13 @@ main.calfit .calhd{position:static;margin-top:0}
 main.calfit .tgb{flex:1;height:auto;min-height:0;overscroll-behavior:contain}
 html.calfixed,html.calfixed body{overflow:hidden;overscroll-behavior:none}
 .calhd{position:sticky;top:calc(var(--top) + 48px);z-index:4;background:var(--bg);margin-top:-4px;padding:4px 0}
+.ev{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;cursor:pointer}
+.ev .rh{position:absolute;left:0;right:0;bottom:0;height:12px;cursor:ns-resize;touch-action:none}
+.ev .rh::after{content:"";position:absolute;left:50%;bottom:3px;width:18px;height:3px;border-radius:2px;background:currentColor;opacity:.25;transform:translateX(-50%)}
+.ev.drag{z-index:5;box-shadow:0 6px 18px rgba(0,0,0,.25);opacity:.95;touch-action:none}
+.ev.drag::before{content:attr(data-tip);position:absolute;right:4px;top:2px;font-size:10px;font-weight:700;color:var(--accent)}
+.calhd .ttl{cursor:pointer}
+.todayChip{display:inline-block;font-size:13px;font-weight:600;color:var(--accent);background:var(--accent-soft);padding:5px 12px;border-radius:14px}
 /* kanban */
 .kanban{display:flex;gap:12px;overflow-x:auto;margin:0 -16px;padding:0 16px 10px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
 .kcol{flex:0 0 82%;max-width:320px;scroll-snap-align:start}
@@ -1313,7 +1320,7 @@ function exportICS(t){
   const d=t.date.replace(/-/g,'');const now=new Date();
   const stamp=now.toISOString().replace(/[-:]/g,'').replace(/\.\d+/,'');
   const L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Planner//RU','CALSCALE:GREGORIAN','BEGIN:VEVENT',`UID:${t.id}@planner`,`DTSTAMP:${stamp}`,`SUMMARY:${icsEsc(t.title)}`];
-  if(t.time){const[h,m]=t.time.split(':');L.push(`DTSTART:${d}T${h}${m}00`,'DURATION:PT30M')}
+  if(t.time){const[h,m]=t.time.split(':');L.push(`DTSTART:${d}T${h}${m}00`,`DURATION:PT${t.dur||60}M`)}
   else{L.push(`DTSTART;VALUE=DATE:${d}`,`DTEND;VALUE=DATE:${addDays(t.date,1).replace(/-/g,'')}`)}
   const desc=[t.notes,...t.subtasks.map(s=>(s.done?'☑ ':'☐ ')+s.title)].filter(Boolean).join('\n');if(desc)L.push(`DESCRIPTION:${icsEsc(desc)}`);
   const rr={daily:'FREQ=DAILY',weekdays:'FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',weekly:'FREQ=WEEKLY',monthly:'FREQ=MONTHLY',yearly:'FREQ=YEARLY'}[t.repeat];if(rr)L.push('RRULE:'+rr);
@@ -1348,7 +1355,7 @@ function renderCal(){
     const rel=s===tdy?'Сегодня':s===addDays(tdy,1)?'Завтра':s===addDays(tdy,-1)?'Вчера':`${a.getDate()} ${MONG[a.getMonth()]}, ${WD[wdi(s)].toLowerCase()}`;
     ttl=n===1?`<small style="display:block;font-size:12px;font-weight:500;color:var(--muted)">${MON[a.getMonth()]}${a.getFullYear()!==new Date().getFullYear()?' '+a.getFullYear():''}</small>${rel}`:(a.getMonth()===bb.getMonth()?`${a.getDate()}–${bb.getDate()} ${MONG[a.getMonth()]}`:`${a.getDate()} ${MONS[a.getMonth()]} – ${bb.getDate()} ${MONS[bb.getMonth()]}`)}
   if(mode==='day'){const a=pd(U.calRef);$('#title').textContent=MON[a.getMonth()][0].toUpperCase()+MON[a.getMonth()].slice(1)+(a.getFullYear()!==new Date().getFullYear()?' '+a.getFullYear():'')}
-  let h=`<div class="calhd"><button class="iconbtn" id="cPrev">${I.left}</button><div class="ttl" style="${mode==='day'||mode==='week'||mode==='3day'?'text-transform:none':''}">${mode==='day'?'':ttl}</div><button class="btn sec sm" id="cToday">Сегодня</button><button class="iconbtn" id="cNext">${I.right}</button></div>`;
+  let h=`<div class="calhd"><button class="iconbtn" id="cPrev">${I.left}</button><button class="ttl" id="cToday" style="${mode==='day'||mode==='week'||mode==='3day'?'text-transform:none':''}" aria-label="Перейти к сегодня">${mode==='day'?(U.calRef!==tdy?'<span class="todayChip">↩ Сегодня</span>':''):ttl}</button><button class="iconbtn" id="cNext">${I.right}</button></div>`;
   if(mode==='year')h+=yearView(ref.getFullYear());
   else if(mode==='list'){h+=miniMonth(ref);h+=`<div class="agenda">${dayAgenda(U.calSel)}</div>`}
   else if(mode==='month'){h+=bigMonth(ref);h+=`<div class="agenda">${dayAgenda(U.calSel)}</div>`}
@@ -1361,16 +1368,20 @@ function renderCal(){
     render()};
   $('#cPrev').onclick=()=>step(-1);$('#cNext').onclick=()=>step(1);
   $('#cToday').onclick=()=>{U.calSel=U.calRef=today();render()};
+  if(mode==='day'){$('#title').style.cursor='pointer';$('#title').onclick=()=>{if(U.view==='cal'){U.calSel=U.calRef=today();render()}}}else $('#title').onclick=null;
   main.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{U.calSel=b.dataset.d;if(pd(b.dataset.d).getMonth()!==pd(U.calRef).getMonth())U.calRef=b.dataset.d;render()});
   main.querySelectorAll('[data-ym]').forEach(b=>b.onclick=()=>{U.calMode='month';U.calRef=b.dataset.ym;render()});
   main.querySelectorAll('[data-yd]').forEach(b=>b.onclick=e=>{e.stopPropagation();U.calMode='list';U.calRef=U.calSel=b.dataset.yd;render()});
   main.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>quickAdd({date:b.dataset.add}));
   main.querySelectorAll('[data-slot]').forEach(c=>c.onclick=e=>{if(e.target!==c)return;const r=c.getBoundingClientRect();const hr=Math.max(0,Math.min(23,Math.floor((e.clientY-r.top)/(+c.dataset.hh||48))));quickAdd({date:c.dataset.slot,time:pad(hr)+':00'})});
-  main.querySelectorAll('[data-ev]').forEach(b=>b.onclick=e=>{e.stopPropagation();openTask(b.dataset.ev)});
-  const tb=main.querySelector('.tgb');if(tb){const hasToday=!!tb.querySelector('.nowl');const hh=+(tb.querySelector('[data-hh]')||{dataset:{hh:48}}).dataset.hh;tb.scrollTop=Math.max(0,(hasToday?Math.min(new Date().getHours(),20)-1:7)*hh)}
+  main.querySelectorAll('[data-ev]').forEach(b=>b.onclick=e=>{e.stopPropagation();if(b._dragged)return;openTask(b.dataset.ev)});
+  main.querySelectorAll('.ev').forEach(evDrag);
+  
   main.querySelectorAll('[data-wk]').forEach(b=>b.onclick=()=>{U.calRef=U.calSel=b.dataset.wk;render()});
   main.querySelectorAll('[data-adm]').forEach(b=>b.onclick=e=>{e.stopPropagation();U.allDayOpen=b.dataset.adm==='1';render()});
   fitCal();
+  const tb=main.querySelector('.tgb');if(tb){const key=mode+U.calRef;if(U.tgKeep&&U.tgKeep.key===key)tb.scrollTop=U.tgKeep.top;else{const hasToday=!!tb.querySelector('.nowl');const hh=+(tb.querySelector('[data-hh]')||{dataset:{hh:48}}).dataset.hh;tb.scrollTop=Math.max(0,(hasToday?Math.min(new Date().getHours(),20)-1:7)*hh)}
+    tb.addEventListener('scroll',()=>{U.tgKeep={key,top:tb.scrollTop}},{passive:true});U.tgKeep={key,top:tb.scrollTop}}
   bindTaskEvents();
 }
 /* сетка по часам занимает ровно экран: шапка не уезжает, прокручиваются только часы */
@@ -1415,12 +1426,42 @@ function yearView(y){
 }
 function layoutDay(evs,dur){
   // раскладывает пересекающиеся задачи по колонкам: [{t,start,col,cols}]
-  const it=evs.map(t=>{const[hh,mm]=t.time.split(':').map(Number);return{t,start:hh*60+mm}}).sort((a,b)=>a.start-b.start||a.t.title.localeCompare(b.t.title));
+  const it=evs.map(t=>{const[hh,mm]=t.time.split(':').map(Number);return{t,start:hh*60+mm,dur:t.dur||60}}).sort((a,b)=>a.start-b.start||a.t.title.localeCompare(b.t.title));
   let cluster=[],end=-1;const out=[];
-  const flush=()=>{const colsEnd=[];cluster.forEach(e=>{let c=colsEnd.findIndex(x=>x<=e.start);if(c<0){c=colsEnd.length;colsEnd.push(0)}colsEnd[c]=e.start+dur;e.col=c});cluster.forEach(e=>e.cols=colsEnd.length);out.push(...cluster);cluster=[]};
-  it.forEach(e=>{if(cluster.length&&e.start>=end){flush();end=-1}cluster.push(e);end=Math.max(end,e.start+dur)});
+  const flush=()=>{const colsEnd=[];cluster.forEach(e=>{let c=colsEnd.findIndex(x=>x<=e.start);if(c<0){c=colsEnd.length;colsEnd.push(0)}colsEnd[c]=e.start+e.dur;e.col=c});cluster.forEach(e=>e.cols=colsEnd.length);out.push(...cluster);cluster=[]};
+  it.forEach(e=>{if(cluster.length&&e.start>=end){flush();end=-1}cluster.push(e);end=Math.max(end,e.start+e.dur)});
   if(cluster.length)flush();
   return out;
+}
+function minToHM(m){m=Math.max(0,Math.min(24*60,m));return pad(Math.floor(m/60)%24===0&&m>=1440?24:Math.floor(m/60))+':'+pad(m%60)}
+/* перетаскивание задачи в сетке: долгое нажатие и тянуть — сдвиг времени; нижний край — длительность */
+function evDrag(el){
+  const col=el.parentElement;const HH=+col.dataset.hh;const snap=HH/4;
+  let mode=null,y0=0,top0=0,h0=0,timer=null,moved=false,sm=el.querySelector('small');
+  const label=(t,hh)=>{const s=Math.round(t/HH*60),e=s+Math.round(hh/HH*60);if(sm)sm.textContent=minToHM(s)+'–'+minToHM(e);el.dataset.tip=minToHM(s)+'–'+minToHM(e)};
+  const begin=(y,handle,mouse)=>{y0=y;top0=el.offsetTop;h0=el.offsetHeight+2;moved=false;mode=null;clearTimeout(timer);
+    if(handle){mode='resize';el.classList.add('drag')}
+    else if(!mouse)timer=setTimeout(()=>{mode='move';el.classList.add('drag');if(navigator.vibrate)navigator.vibrate(12)},350);
+    else mode='move?'};
+  const go=(y,e)=>{const dy=y-y0;
+    if(mode==='move?'){if(Math.abs(dy)>4){mode='move';el.classList.add('drag')}else return}
+    if(!mode){if(Math.abs(dy)>8)clearTimeout(timer);return}
+    if(e.cancelable)e.preventDefault();moved=true;
+    if(mode==='move'){let t=Math.round((top0+dy)/snap)*snap;t=Math.max(0,Math.min(24*HH-h0,t));el.style.top=t+'px';label(t,h0)}
+    else{let hh=Math.max(snap,Math.round((h0+dy)/snap)*snap);hh=Math.min(hh,24*HH-top0);el.style.height=(hh-2)+'px';label(top0,hh)}};
+  const finish=()=>{clearTimeout(timer);const m=mode;el.classList.remove('drag');mode=null;
+    if(!moved||!m||m==='move?')return;el._dragged=true;setTimeout(()=>el._dragged=false,400);
+    const t=S.tasks.find(x=>x.id===el.dataset.ev);if(!t)return;
+    if(m==='move'){const s=Math.round(el.offsetTop/HH*60/15)*15;t.time=minToHM(Math.min(s,23*60+45));t.notified=false;toast('Время: '+t.time)}
+    else{const d=Math.max(15,Math.round((el.offsetHeight+2)/HH*60/15)*15);t.dur=d;toast('Длительность: '+(d>=60?Math.floor(d/60)+' ч '+(d%60?d%60+' мин':''):d+' мин'))}
+    save();render()};
+  el.addEventListener('touchstart',e=>{if(e.touches.length!==1)return;begin(e.touches[0].clientY,!!e.target.closest('.rh'),false)},{passive:true});
+  el.addEventListener('touchmove',e=>go(e.touches[0].clientY,e),{passive:false});
+  el.addEventListener('touchend',finish);el.addEventListener('touchcancel',()=>{clearTimeout(timer);el.classList.remove('drag');mode=null});
+  el.addEventListener('mousedown',e=>{if(e.button!==0)return;begin(e.clientY,!!e.target.closest('.rh'),true);
+    const mm=ev=>go(ev.clientY,ev),mu=()=>{window.removeEventListener('mousemove',mm);window.removeEventListener('mouseup',mu);finish()};
+    window.addEventListener('mousemove',mm);window.addEventListener('mouseup',mu)});
+  el.addEventListener('contextmenu',e=>e.preventDefault());
 }
 function evColor(t){const l=listById(t.listId);const c=t.priority===3?'#E5484D':t.priority===2?'#F5A524':(l.color&&l.color.startsWith('#')?l.color:(S.settings.accent||'#4772FA'));return c}
 function timeGrid(start,n){
@@ -1445,9 +1486,9 @@ function timeGrid(start,n){
   const now=new Date();const nowTop=(now.getHours()*60+now.getMinutes())/60*HH;
   days.forEach(d=>{
     const lay=layoutDay(tasksOn(d).filter(t=>t.time),DUR);
-    h+=`<div class="col" data-slot="${d}" data-hh="${HH}" style="background-image:repeating-linear-gradient(to bottom,var(--line) 0 1px,transparent 1px ${HH}px)">${lay.map(({t,start,col,cols:nc})=>{
+    h+=`<div class="col" data-slot="${d}" data-hh="${HH}" style="background-image:repeating-linear-gradient(to bottom,var(--line) 0 1px,transparent 1px ${HH}px)">${lay.map(({t,start,dur,col,cols:nc})=>{
       const top=start/60*HH;const w=100/nc;const c=evColor(t);
-      return `<button class="ev ${t.done?'dn':''}" data-ev="${t.id}" style="top:${top}px;height:${DUR/60*HH-3}px;left:calc(${col*w}% + 2px);width:calc(${w}% - 4px);right:auto;border-left-color:${c};background:${mix(card,c,dark?.32:.2)}">${esc(t.title)}${(n<7&&nc<3)?`<small>${t.time}</small>`:''}</button>`}).join('')}${d===tdy?`<div class="nowl" style="top:${nowTop}px"></div>`:''}</div>`;
+      return `<div class="ev ${t.done?'dn':''}" role="button" data-ev="${t.id}" data-start="${start}" data-dur="${dur}" style="top:${top}px;height:${dur/60*HH-2}px;left:calc(${col*w}% + 2px);width:calc(${w}% - 4px);right:auto;border-left-color:${c};background:${mix(card,c,dark?.32:.2)}">${esc(t.title)}${(n<7&&nc<3)?`<small>${t.time}–${minToHM(start+dur)}</small>`:''}<span class="rh" aria-label="Изменить длительность"></span></div>`}).join('')}${d===tdy?`<div class="nowl" style="top:${nowTop}px"></div>`:''}</div>`;
   });
   return h+`</div></div></div>`;
 }
@@ -1642,7 +1683,7 @@ function renderMore(){
     <p class="note">Веб-приложение присылает уведомления, пока оно открыто или недавно свёрнуто. Для важных дел нажмите в задаче «📅 В Календарь iPhone» — тогда напомнит системный Календарь, даже если приложение закрыто.</p></div>
    <div class="card sec mt"><h3>💾 Где хранятся данные</h3>
     <p class="note">Только на этом устройстве, в браузере. Никаких аккаунтов и серверов. ${storageOk?'':'<b style="color:var(--p3)">Сейчас хранилище недоступно — данные не сохранятся после закрытия.</b>'} Делайте резервную копию раз в пару недель: если долго не открывать веб-приложение, iOS может очистить его данные.</p></div>
-   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v3.1</p>`;
+   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v3.2</p>`;
   main.querySelectorAll('[data-acc]').forEach(b=>b.onclick=()=>{S.settings.accent=b.dataset.acc;save();applyAccent();render()});
   main.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{S.settings.theme=b.dataset.th;save();applyTheme();render()});
   const nb=$('#nBtn');if(nb)nb.onclick=async()=>{
