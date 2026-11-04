@@ -1386,17 +1386,20 @@ function renderCal(){
 /* сетка по часам занимает ровно экран: шапка не уезжает, прокручиваются только часы */
 function fitCal(){if(!main.classList.contains('calfit'))return;window.scrollTo(0,0);const top=main.getBoundingClientRect().top;const tabs=$('#tabs').offsetHeight;const vh=(window.visualViewport?visualViewport.height:innerHeight);main.style.height=Math.max(320,vh-top-tabs)+'px'}
 window.addEventListener('resize',fitCal);
-/* свайп влево/вправо в календаре — следующий/предыдущий день (неделя, месяц…) */
+/* свайп влево/вправо только по полосе дней / сетке календаря */
 (function(){
-  let x0=null,y0=0,ok=false;
-  main.addEventListener('touchstart',e=>{if(U.view!=='cal'||e.touches.length!==1||e.target.closest('.ev.drag,.rh')){x0=null;return}x0=e.touches[0].clientX;y0=e.touches[0].clientY;ok=true},{passive:true});
+  const ZONE='.wkstrip,.tgh,.mg,.yr,.card .grid7';
+  let x0=null,y0=0,ok=false,zone=null;
+  main.addEventListener('touchstart',e=>{zone=null;if(U.view!=='cal'||e.touches.length!==1){x0=null;return}zone=e.target.closest(ZONE);if(!zone){x0=null;return}x0=e.touches[0].clientX;y0=e.touches[0].clientY;ok=true},{passive:true});
   main.addEventListener('touchmove',e=>{if(x0===null||!ok)return;const dx=e.touches[0].clientX-x0,dy=e.touches[0].clientY-y0;
-    if(main.querySelector('.ev.drag')){ok=false;main.style.transform='';return}
-    if(Math.abs(dy)>Math.abs(dx)&&Math.abs(dy)>10){ok=false;main.style.transform='';return}
-    if(Math.abs(dx)>10){main.style.transition='none';main.style.transform=`translateX(${dx*.35}px)`}},{passive:true});
-  main.addEventListener('touchend',e=>{if(x0===null)return;const dx=e.changedTouches[0].clientX-x0,dy=e.changedTouches[0].clientY-y0;const go=ok&&Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5;x0=null;
-    main.style.transition='transform .18s';main.style.transform='';
-    if(go&&U.calStep){U.calStep(dx<0?1:-1);main.animate&&main.animate([{transform:`translateX(${dx<0?40:-40}px)`,opacity:.4},{transform:'none',opacity:1}],{duration:180,easing:'ease-out'})}});
+    if(Math.abs(dy)>Math.abs(dx)&&Math.abs(dy)>10){ok=false;zone.style.transform='';return}
+    if(Math.abs(dx)>10){zone.style.transition='none';zone.style.transform=`translateX(${dx*.5}px)`}},{passive:true});
+  main.addEventListener('touchend',e=>{if(x0===null||!zone)return;const dx=e.changedTouches[0].clientX-x0,dy=e.changedTouches[0].clientY-y0;const go=ok&&Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5;x0=null;
+    const isStrip=zone.classList.contains('wkstrip');zone.style.transition='transform .18s';zone.style.transform='';
+    if(!go)return;const dir=dx<0?1:-1;
+    if(isStrip){U.calRef=U.calSel=addDays(U.calRef,dir*7);render()}else if(U.calStep)U.calStep(dir);
+    const nz=main.querySelector(isStrip?'.wkstrip':ZONE);if(nz&&nz.animate)nz.animate([{transform:`translateX(${dir*60}px)`,opacity:.3},{transform:'none',opacity:1}],{duration:200,easing:'ease-out'});
+  });
 })();
 main.addEventListener('scroll',()=>{if(main.classList.contains('calfit')&&main.scrollTop)main.scrollTop=0});
 function miniMonth(ref){
@@ -1694,7 +1697,7 @@ function renderMore(){
     <p class="note">Веб-приложение присылает уведомления, пока оно открыто или недавно свёрнуто. Для важных дел нажмите в задаче «📅 В Календарь iPhone» — тогда напомнит системный Календарь, даже если приложение закрыто.</p></div>
    <div class="card sec mt"><h3>💾 Где хранятся данные</h3>
     <p class="note">Только на этом устройстве, в браузере. Никаких аккаунтов и серверов. ${storageOk?'':'<b style="color:var(--p3)">Сейчас хранилище недоступно — данные не сохранятся после закрытия.</b>'} Делайте резервную копию раз в пару недель: если долго не открывать веб-приложение, iOS может очистить его данные.</p></div>
-   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v3.3</p>`;
+   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v3.4</p>`;
   main.querySelectorAll('[data-acc]').forEach(b=>b.onclick=()=>{S.settings.accent=b.dataset.acc;save();applyAccent();render()});
   main.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{S.settings.theme=b.dataset.th;save();applyTheme();render()});
   const nb=$('#nBtn');if(nb)nb.onclick=async()=>{
