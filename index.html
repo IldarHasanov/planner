@@ -245,6 +245,8 @@ button.ghead{width:calc(100% - 8px);text-align:left;padding:4px 0;font-family:in
 .ev.dn{opacity:.5;text-decoration:line-through}
 .nowl{position:absolute;left:0;right:0;height:2px;background:var(--p3);z-index:2}
 .nowl::before{content:"";position:absolute;left:-4px;top:-3px;width:8px;height:8px;border-radius:50%;background:var(--p3)}
+html.lock,html.lock body{overflow:hidden;overscroll-behavior:none}
+#sheet .in,#dp .dpIn{will-change:transform}
 /* kanban */
 .kanban{display:flex;gap:12px;overflow-x:auto;margin:0 -16px;padding:0 16px 10px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
 .kcol{flex:0 0 82%;max-width:320px;scroll-snap-align:start}
@@ -799,9 +801,9 @@ function popMenu(items,title,back){
     if(!it.keep)closeMenu();it.act&&it.act()});
   const bb=box.querySelector('#mBack');if(bb)bb.onclick=back;
   m.querySelector('.mscrim').onclick=closeMenu;
-  m.classList.add('on');
+  m.classList.add('on');lockScroll();
 }
-function closeMenu(){$('#menu').classList.remove('on')}
+function closeMenu(){$('#menu').classList.remove('on');lockScroll()}
 function listMenu(){
   const key=U.list;const v=VS(key);const l=S.lists.find(x=>x.id===key&&!x.system);const f=key.startsWith('folder:')?folderById(key.slice(7)):null;
   const isFolder=!!f;
@@ -944,15 +946,38 @@ $('#scrim').onclick=closeDrawer;
 let sheetClose=null;
 function openSheet(html,onClose,compact){
   const s=$('#sheet');const inn=s.querySelector('.in');const full=compact==='full';inn.classList.toggle('compact',compact===true);inn.classList.toggle('full',full);inn.innerHTML=(compact?'':'<div class="grab"></div>')+html;s.querySelector('.in').scrollTop=0;
-  s.classList.add('on');const sc=$('#sheetScrim');sc.style.opacity=1;sc.style.pointerEvents='auto';
-  sheetClose=onClose||null;
+  inn.style.transform='';s.classList.add('on');const sc=$('#sheetScrim');sc.style.opacity=1;sc.style.pointerEvents='auto';
+  sheetClose=onClose||null;lockScroll();
 }
 function closeSheet(skipCb){
   if(!skipCb&&sheetClose){const f=sheetClose;sheetClose=null;f()}else sheetClose=null;
   $('#sheet').classList.remove('on');const sc=$('#sheetScrim');sc.style.opacity=0;sc.style.pointerEvents='none';
-  if(document.activeElement)document.activeElement.blur();
+  if(document.activeElement)document.activeElement.blur();lockScroll();
 }
 $('#sheetScrim').onclick=()=>closeSheet();
+/* блокировка прокрутки страницы под открытыми окнами */
+function lockScroll(){const on=$('#sheet').classList.contains('on')||$('#dp').classList.contains('on')||$('#menu').classList.contains('on');document.documentElement.classList.toggle('lock',on)}
+['#sheetScrim','#dp .dpScrim','#menu .mscrim','#scrim'].forEach(s=>{const el=$(s);if(el)el.addEventListener('touchmove',e=>e.preventDefault(),{passive:false})});
+/* смахивание вниз закрывает окно (как в TickTick) */
+function dragDismiss(panel,close){
+  let y0=null,dy=0,drag=false;
+  panel.addEventListener('touchstart',e=>{if(e.touches.length!==1){y0=null;return}y0=e.touches[0].clientY;dy=0;drag=false},{passive:true});
+  panel.addEventListener('touchmove',e=>{
+    if(y0===null)return;dy=e.touches[0].clientY-y0;
+    if(!drag){
+      const inner=e.target.closest&&e.target.closest('.tgb,.kanban,.qa-panel,textarea');
+      const innerScrolled=inner&&inner.scrollTop>0;
+      if(dy>4&&panel.scrollTop<=0&&!innerScrolled){drag=true;panel.style.transition='none';if(document.activeElement&&document.activeElement.blur)document.activeElement.blur()}
+      else if(dy<-4||(dy>4&&panel.scrollTop>0)){y0=null;return}
+      else return;
+    }
+    e.preventDefault();panel.style.transform=`translateY(${Math.max(0,dy)}px)`;
+  },{passive:false});
+  const end=()=>{if(drag){panel.style.transition='';if(dy>Math.min(120,panel.offsetHeight*.25)){close();setTimeout(()=>{panel.style.transform=''},300)}else panel.style.transform=''}y0=null;drag=false};
+  panel.addEventListener('touchend',end);panel.addEventListener('touchcancel',end);
+}
+dragDismiss($('#sheet .in'),()=>{$('#sheet .in').style.transform='';closeSheet()});
+dragDismiss($('#dp .dpIn'),()=>{const dp=$('#dp');dp._cancel?dp._cancel():dp.classList.remove('on')});
 const SI=s=>$('#sheet .in').querySelector(s);
 const SA=s=>$('#sheet .in').querySelectorAll(s);
 
@@ -1174,9 +1199,10 @@ function datePicker(init,onApply,onCancel){
     inn.querySelector('#dpOk').onclick=()=>{close();onApply(st)};
     inn.querySelector('#dpClear').onclick=()=>{close();onApply({date:'',time:'',remind:null,repeat:''})};
   }
-  function close(){dp.classList.remove('on')}
+  function close(){dp.classList.remove('on');inn.style.transform='';lockScroll()}
   dp.querySelector('.dpScrim').onclick=()=>{close();onCancel&&onCancel()};
-  draw();inn.scrollTop=0;dp.classList.add('on');
+  draw();inn.scrollTop=0;inn.style.transform='';dp.classList.add('on');lockScroll();
+  dp._cancel=()=>{close();onCancel&&onCancel()};
 }
 
 /* ----- карточка задачи (как в TickTick) ----- */
@@ -1564,7 +1590,7 @@ function renderMore(){
     <p class="note">Веб-приложение присылает уведомления, пока оно открыто или недавно свёрнуто. Для важных дел нажмите в задаче «📅 В Календарь iPhone» — тогда напомнит системный Календарь, даже если приложение закрыто.</p></div>
    <div class="card sec mt"><h3>💾 Где хранятся данные</h3>
     <p class="note">Только на этом устройстве, в браузере. Никаких аккаунтов и серверов. ${storageOk?'':'<b style="color:var(--p3)">Сейчас хранилище недоступно — данные не сохранятся после закрытия.</b>'} Делайте резервную копию раз в пару недель: если долго не открывать веб-приложение, iOS может очистить его данные.</p></div>
-   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v2.6</p>`;
+   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v2.7</p>`;
   main.querySelectorAll('[data-acc]').forEach(b=>b.onclick=()=>{S.settings.accent=b.dataset.acc;save();applyAccent();render()});
   main.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{S.settings.theme=b.dataset.th;save();applyTheme();render()});
   const nb=$('#nBtn');if(nb)nb.onclick=async()=>{
