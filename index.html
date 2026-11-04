@@ -206,6 +206,45 @@ button.ghead{width:calc(100% - 8px);text-align:left;padding:4px 0;font-family:in
 #selbar button svg{width:22px;height:22px}
 #selbar button:disabled{opacity:.35}
 #selbar button.danger{color:var(--p3)}
+/* calendar views */
+.calhd{display:flex;align-items:center;gap:4px;margin-bottom:8px}
+.calhd .ttl{flex:1;font-weight:700;font-size:17px;text-transform:capitalize;text-align:center}
+.yr{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 10px}
+.ym{padding:4px;border-radius:10px;text-align:left}
+.ym b{display:block;font-size:13px;margin:0 0 4px 2px;text-transform:capitalize}
+.ym.cur b{color:var(--accent)}
+.ym .g{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;font-size:8.5px;text-align:center;color:var(--text)}
+.ym .g i{font-style:normal;line-height:13px;border-radius:50%}
+.ym .g i.has{font-weight:800;color:var(--accent)}
+.ym .g i.t{background:var(--accent);color:#fff}
+.mg{display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid var(--line);border-left:1px solid var(--line);background:var(--card);border-radius:10px;overflow:hidden}
+.mg .wdh{border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:4px 0}
+.mcell{min-height:78px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:3px 2px;text-align:left;display:flex;flex-direction:column;gap:2px;overflow:hidden;min-width:0}
+.mcell .n{font-size:12px;padding-left:3px}
+.mcell.out{opacity:.45}
+.mcell.today .n{color:#fff;background:var(--accent);border-radius:9px;padding:0 5px;align-self:flex-start;font-weight:700}
+.mcell.sel{background:var(--accent-soft)}
+.mchip{font-size:10px;line-height:14px;padding:0 3px;border-radius:3px;background:var(--accent-soft);color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:2px solid var(--accent)}
+.mchip.dn{opacity:.5;text-decoration:line-through}
+.mmore{font-size:10px;color:var(--muted);padding-left:3px}
+.tgw{background:var(--card);border-radius:12px;overflow:hidden}
+.tgh,.tga{display:grid;border-bottom:1px solid var(--line)}
+.tgh div{text-align:center;padding:6px 0;font-size:12px;color:var(--muted)}
+.tgh div b{display:block;font-size:17px;color:var(--text);font-weight:600}
+.tgh div.t,.tgh div.t b{color:var(--accent)}
+.tga{min-height:28px}
+.tga>div{padding:3px 2px;display:flex;flex-direction:column;gap:2px;border-left:1px solid var(--line);min-width:0}
+.tga>div:first-child{border:0;font-size:10px;color:var(--muted);justify-content:center;align-items:center}
+.tgb{height:calc(100vh - var(--top) - var(--bot) - 290px);min-height:300px;overflow-y:auto;position:relative}
+.tgg{display:grid;position:relative}
+.tgg .hl{position:relative}
+.tgg .hl span{position:absolute;right:6px;transform:translateY(-50%);font-size:10px;color:var(--muted)}
+.tgg .col{position:relative;border-left:1px solid var(--line);background-image:repeating-linear-gradient(to bottom,var(--line) 0 1px,transparent 1px 48px)}
+.ev{position:absolute;left:2px;right:2px;border-radius:5px;background:var(--accent-soft);border-left:3px solid var(--accent);font-size:11px;line-height:1.25;padding:2px 4px;overflow:hidden;text-align:left;color:var(--text)}
+.ev small{display:block;color:var(--muted);font-size:10px}
+.ev.dn{opacity:.5;text-decoration:line-through}
+.nowl{position:absolute;left:0;right:0;height:2px;background:var(--p3);z-index:2}
+.nowl::before{content:"";position:absolute;left:-4px;top:-3px;width:8px;height:8px;border-radius:50%;background:var(--p3)}
 /* kanban */
 .kanban{display:flex;gap:12px;overflow-x:auto;margin:0 -16px;padding:0 16px 10px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
 .kcol{flex:0 0 82%;max-width:320px;scroll-snap-align:start}
@@ -439,6 +478,12 @@ const I={
  copy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg>',
  share:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5M5 13v6a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-6"/></svg>',
  print:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M7 9V3h10v6M7 17H5a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-2"/><rect x="7" y="14" width="10" height="7"/></svg>',
+ vList:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="7" rx="2"/><path d="M4 15h16M4 19h16M9 4v7M15 4v7"/></svg>',
+ vYear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 9.3h16M4 14.6h16M9.3 4v16M14.6 4v16"/></svg>',
+ vMonth:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 12h16M12 4v16"/></svg>',
+ vWeek:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 4v16M12 4v16M16 4v16"/></svg>',
+ v3:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9.3 4v16M14.6 4v16"/></svg>',
+ vDay:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="6" width="14" height="12" rx="2"/><path d="M4 3h16M4 21h16"/></svg>',
  ud:'<svg class="ud" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 9l4-4 4 4M8 15l4 4 4-4"/></svg>',
  attach:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M21 11.5l-8.6 8.6a5.5 5.5 0 0 1-7.8-7.8l8.6-8.6a3.7 3.7 0 0 1 5.2 5.2l-8.6 8.6a1.8 1.8 0 0 1-2.6-2.6l7.9-7.9"/></svg>',
  left:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',
@@ -487,7 +532,7 @@ if(!S.seeded){
 }
 
 /* ========= ui state ========= */
-const U={sel:null,view:'tasks',list:'today',calMode:'month',calSel:today(),calRef:today(),showDone:false,habitRef:today()};
+const U={sel:null,view:'tasks',list:'today',calMode:'list',calSel:today(),calRef:today(),showDone:false,habitRef:today()};
 try{const v=sessionStorage.getItem('planner.ui');if(v)Object.assign(U,JSON.parse(v),{calSel:today(),calRef:today()})}catch(e){}
 function saveUI(){try{sessionStorage.setItem('planner.ui',JSON.stringify({view:U.view,list:U.list,calMode:U.calMode}))}catch(e){}}
 
@@ -680,7 +725,8 @@ function renderTasks(){
   const tdy=today();
   let html='';
   if(U.list!=='done'&&!U.sel){
-    html+=`<form class="quick" id="quickForm"><input id="quickInp" placeholder="Добавить задачу…" autocomplete="off" enterkeyhint="done"></form>`;
+    html+=`<form class="quick" id="quickForm"><input id="quickInp" placeholder="Добавить задачу…" autocomplete="off" enterkeyhint="done"></form>
+    <div class="hint">Подсказка: «завтра 15:00», «пт», «!3» — приоритет, «#тег»</div>`;
   }
   const items=S.tasks.filter(smartFilter(U.list)).sort(SORTS[v.sortBy]||sortTasks);
   if(U.list==='done'){
@@ -968,7 +1014,7 @@ function confirmBox(title,text,ok,okLabel='Удалить'){
 
 /* ----- quick add (компактное окно над клавиатурой) ----- */
 function quickAdd(pre={}){
-  const st={date:pre.date||'',time:'',priority:0,listId:pre.listId||'inbox',tags:(pre.tags||[]).slice()};
+  const st={date:pre.date||'',time:pre.time||'',priority:0,listId:pre.listId||'inbox',tags:(pre.tags||[]).slice()};
   openSheet(`<input class="qa-title" id="qaTitle" placeholder="Что бы вы хотели сделать?" autocomplete="off" enterkeyhint="send">
     <input class="qa-note" id="qaNote" placeholder="Описание" autocomplete="off">
     <div class="qa-panel" id="qaPanel"></div>
@@ -1245,35 +1291,87 @@ function downloadText(name,text,mime){
 
 /* ----- calendar ----- */
 function tasksOn(date){return S.tasks.filter(t=>occursOn(t,date)).sort(sortTasks)}
+const CALV={list:['Список','vList'],year:['Год','vYear'],month:['Месяц','vMonth'],week:['Неделя','vWeek'],'3day':['3 дня','v3'],day:['День','vDay']};
 function renderCal(){
+  if(!CALV[U.calMode])U.calMode='list';
+  const mode=U.calMode;const tdy=today();const ref=pd(U.calRef);
   $('#title').textContent='Календарь';
-  $('#topActions').innerHTML=`<div class="seg" style="width:150px"><button data-m="month" class="${U.calMode==='month'?'on':''}">Месяц</button><button data-m="week" class="${U.calMode==='week'?'on':''}">Неделя</button></div>`;
-  document.querySelectorAll('#topActions [data-m]').forEach(b=>b.onclick=()=>{U.calMode=b.dataset.m;U.calRef=U.calSel;render()});
-  const tdy=today();let h='';
-  if(U.calMode==='month'){
-    const ref=pd(U.calRef);const first=new Date(ref.getFullYear(),ref.getMonth(),1);
-    const start=addDays(ds(first),-((first.getDay()+6)%7));
-    h+=`<div class="calbar"><button class="iconbtn" id="cPrev">${I.left}</button><div class="ttl">${MON[ref.getMonth()]} ${ref.getFullYear()}</div><button class="btn sec sm" id="cToday">Сегодня</button><button class="iconbtn" id="cNext">${I.right}</button></div>
-    <div class="card" style="padding:8px"><div class="grid7">${WD.map(w=>`<div class="wdh">${w}</div>`).join('')}`;
-    for(let i=0;i<42;i++){
-      const d=addDays(start,i);const dd=pd(d);const ts=tasksOn(d);
-      const dots=ts.slice(0,3).map(t=>`<i class="${t.done?'dn':(t.priority>=2?'p'+t.priority:'')}"></i>`).join('');
-      h+=`<button class="cday ${dd.getMonth()!==ref.getMonth()?'out':''} ${d===tdy?'today':''} ${d===U.calSel?'sel':''}" data-d="${d}"><span class="n">${dd.getDate()}</span><span class="dots">${dots}</span></button>`;
-      if(i===34&&pd(addDays(start,35)).getMonth()!==ref.getMonth())break;
-    }
-    h+=`</div></div><div class="agenda">${dayAgenda(U.calSel)}</div>`;
-  }else{
-    const mon=addDays(U.calRef,-wdi(U.calRef));const sun=addDays(mon,6);const a=pd(mon),b=pd(sun);
-    h+=`<div class="calbar"><button class="iconbtn" id="cPrev">${I.left}</button><div class="ttl" style="text-transform:none">${a.getDate()} ${MONG[a.getMonth()]} — ${b.getDate()} ${MONG[b.getMonth()]}</div><button class="btn sec sm" id="cToday">Сегодня</button><button class="iconbtn" id="cNext">${I.right}</button></div>`;
-    for(let i=0;i<7;i++){const d=addDays(mon,i);h+=dayAgenda(d,true)}
-  }
+  $('#topActions').innerHTML=`<button class="iconbtn" id="calView" aria-label="Вид календаря">${I[CALV[mode][1]]}</button>`;
+  $('#calView').onclick=()=>popMenu(Object.entries(CALV).map(([k,[n,ic]])=>({label:n,icon:I[ic],check:mode===k,act:()=>{U.calMode=k;U.calRef=U.calSel;render()}})),'Вид календаря');
+  let ttl;
+  if(mode==='year')ttl=String(ref.getFullYear());
+  else if(mode==='list'||mode==='month')ttl=`${MON[ref.getMonth()]}${ref.getFullYear()!==new Date().getFullYear()?' '+ref.getFullYear():''}`;
+  else{const n=mode==='week'?7:mode==='3day'?3:1;const s=mode==='week'?addDays(U.calRef,-wdi(U.calRef)):U.calRef;const e=addDays(s,n-1);const a=pd(s),bb=pd(e);
+    ttl=n===1?`${a.getDate()} ${MONG[a.getMonth()]}, ${WDL[wdi(s)]}`:(a.getMonth()===bb.getMonth()?`${a.getDate()}–${bb.getDate()} ${MONG[a.getMonth()]}`:`${a.getDate()} ${MONS[a.getMonth()]} – ${bb.getDate()} ${MONS[bb.getMonth()]}`)}
+  let h=`<div class="calhd"><button class="iconbtn" id="cPrev">${I.left}</button><div class="ttl" style="${mode==='day'||mode==='week'||mode==='3day'?'text-transform:none':''}">${ttl}</div><button class="btn sec sm" id="cToday">Сегодня</button><button class="iconbtn" id="cNext">${I.right}</button></div>`;
+  if(mode==='year')h+=yearView(ref.getFullYear());
+  else if(mode==='list'){h+=miniMonth(ref);h+=`<div class="agenda">${dayAgenda(U.calSel)}</div>`}
+  else if(mode==='month'){h+=bigMonth(ref);h+=`<div class="agenda">${dayAgenda(U.calSel)}</div>`}
+  else{const n=mode==='week'?7:mode==='3day'?3:1;const s=mode==='week'?addDays(U.calRef,-wdi(U.calRef)):U.calRef;h+=timeGrid(s,n)}
   main.innerHTML=h;
-  main.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{U.calSel=b.dataset.d;if(pd(b.dataset.d).getMonth()!==pd(U.calRef).getMonth())U.calRef=b.dataset.d;render()});
-  $('#cPrev').onclick=()=>{if(U.calMode==='month'){const r=pd(U.calRef);r.setDate(1);r.setMonth(r.getMonth()-1);U.calRef=ds(r)}else U.calRef=addDays(U.calRef,-7);render()};
-  $('#cNext').onclick=()=>{if(U.calMode==='month'){const r=pd(U.calRef);r.setDate(1);r.setMonth(r.getMonth()+1);U.calRef=ds(r)}else U.calRef=addDays(U.calRef,7);render()};
+  const step=d=>{const r=pd(U.calRef);
+    if(mode==='year'){r.setFullYear(r.getFullYear()+d);U.calRef=ds(r)}
+    else if(mode==='list'||mode==='month'){r.setDate(1);r.setMonth(r.getMonth()+d);U.calRef=ds(r)}
+    else{const n=mode==='week'?7:mode==='3day'?3:1;U.calRef=addDays(U.calRef,d*n);U.calSel=U.calRef}
+    render()};
+  $('#cPrev').onclick=()=>step(-1);$('#cNext').onclick=()=>step(1);
   $('#cToday').onclick=()=>{U.calSel=U.calRef=today();render()};
+  main.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{U.calSel=b.dataset.d;if(pd(b.dataset.d).getMonth()!==pd(U.calRef).getMonth())U.calRef=b.dataset.d;render()});
+  main.querySelectorAll('[data-ym]').forEach(b=>b.onclick=()=>{U.calMode='month';U.calRef=b.dataset.ym;render()});
+  main.querySelectorAll('[data-yd]').forEach(b=>b.onclick=e=>{e.stopPropagation();U.calMode='list';U.calRef=U.calSel=b.dataset.yd;render()});
   main.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>quickAdd({date:b.dataset.add}));
+  main.querySelectorAll('[data-slot]').forEach(c=>c.onclick=e=>{if(e.target!==c)return;const r=c.getBoundingClientRect();const hr=Math.max(0,Math.min(23,Math.floor((e.clientY-r.top)/48)));quickAdd({date:c.dataset.slot,time:pad(hr)+':00'})});
+  main.querySelectorAll('[data-ev]').forEach(b=>b.onclick=e=>{e.stopPropagation();openTask(b.dataset.ev)});
+  const tb=main.querySelector('.tgb');if(tb){const hasToday=!!tb.querySelector('.nowl');tb.scrollTop=Math.max(0,(hasToday?Math.min(new Date().getHours(),20)-1:7)*48)}
   bindTaskEvents();
+}
+function miniMonth(ref){
+  const tdy=today();const first=new Date(ref.getFullYear(),ref.getMonth(),1);const start=addDays(ds(first),-((first.getDay()+6)%7));
+  let h=`<div class="card" style="padding:8px"><div class="grid7">${WD.map(w=>`<div class="wdh">${w}</div>`).join('')}`;
+  for(let i=0;i<42;i++){
+    const d=addDays(start,i);const dd=pd(d);const ts=tasksOn(d);
+    const dots=ts.slice(0,3).map(t=>`<i class="${t.done?'dn':(t.priority>=2?'p'+t.priority:'')}"></i>`).join('');
+    h+=`<button class="cday ${dd.getMonth()!==ref.getMonth()?'out':''} ${d===tdy?'today':''} ${d===U.calSel?'sel':''}" data-d="${d}"><span class="n">${dd.getDate()}</span><span class="dots">${dots}</span></button>`;
+    if(i===34&&pd(addDays(start,35)).getMonth()!==ref.getMonth())break;
+  }
+  return h+'</div></div>';
+}
+function bigMonth(ref){
+  const tdy=today();const first=new Date(ref.getFullYear(),ref.getMonth(),1);const start=addDays(ds(first),-((first.getDay()+6)%7));
+  let h=`<div class="mg">${WD.map(w=>`<div class="wdh">${w}</div>`).join('')}`;
+  for(let i=0;i<42;i++){
+    const d=addDays(start,i);const dd=pd(d);const ts=tasksOn(d);
+    h+=`<button class="mcell ${dd.getMonth()!==ref.getMonth()?'out':''} ${d===tdy?'today':''} ${d===U.calSel?'sel':''}" data-d="${d}"><span class="n">${dd.getDate()}</span>${ts.slice(0,3).map(t=>`<span class="mchip ${t.done?'dn':''}" style="border-left-color:${t.priority?`var(--p${t.priority})`:listById(t.listId).color||'var(--accent)'}">${esc(t.title)}</span>`).join('')}${ts.length>3?`<span class="mmore">+${ts.length-3}</span>`:''}</button>`;
+    if(i===34&&pd(addDays(start,35)).getMonth()!==ref.getMonth())break;
+  }
+  return h+'</div>';
+}
+function yearView(y){
+  const tdy=today();const has=new Set();
+  S.tasks.forEach(t=>{if(t.date&&t.date.startsWith(String(y)))has.add(t.date)});
+  let h='<div class="yr">';
+  for(let m=0;m<12;m++){
+    const first=new Date(y,m,1);const off=(first.getDay()+6)%7;const n=new Date(y,m+1,0).getDate();
+    let g=WD.map(w=>`<i style="color:var(--muted)">${w[0]}</i>`).join('');for(let i=0;i<off;i++)g+='<i></i>';
+    for(let i=1;i<=n;i++){const d=`${y}-${pad(m+1)}-${pad(i)}`;g+=`<i class="${d===tdy?'t':''} ${has.has(d)?'has':''}" data-yd="${d}">${i}</i>`}
+    const cur=y===new Date().getFullYear()&&m===new Date().getMonth();
+    h+=`<button class="ym ${cur?'cur':''}" data-ym="${y}-${pad(m+1)}-01"><b>${MON[m]}</b><div class="g">${g}</div></button>`;
+  }
+  return h+'</div><p class="note" style="text-align:center;margin-top:14px">Нажмите на месяц, чтобы открыть его, или на число — чтобы увидеть задачи дня.</p>';
+}
+function timeGrid(start,n){
+  const tdy=today();const days=[];for(let i=0;i<n;i++)days.push(addDays(start,i));
+  const cols=`44px repeat(${n},minmax(0,1fr))`;
+  let h=`<div class="tgw"><div class="tgh" style="grid-template-columns:${cols}"><div></div>${days.map(d=>`<div class="${d===tdy?'t':''}">${WD[wdi(d)]}<b>${pd(d).getDate()}</b></div>`).join('')}</div>`;
+  h+=`<div class="tga" style="grid-template-columns:${cols}"><div>весь<br>день</div>${days.map(d=>`<div>${tasksOn(d).filter(t=>!t.time).map(t=>`<button class="mchip ${t.done?'dn':''}" data-ev="${t.id}" style="border-left-color:${t.priority?`var(--p${t.priority})`:'var(--accent)'}">${esc(t.title)}</button>`).join('')}</div>`).join('')}</div>`;
+  h+=`<div class="tgb"><div class="tgg" style="grid-template-columns:${cols};height:${24*48}px"><div class="hl">${Array.from({length:23},(_,i)=>`<span style="top:${(i+1)*48}px">${pad(i+1)}:00</span>`).join('')}</div>`;
+  const now=new Date();const nowTop=(now.getHours()*60+now.getMinutes())/60*48;
+  days.forEach(d=>{
+    const evs=tasksOn(d).filter(t=>t.time);
+    h+=`<div class="col" data-slot="${d}">${evs.map(t=>{const[hh,mm]=t.time.split(':').map(Number);const top=(hh*60+mm)/60*48;
+      return `<button class="ev ${t.done?'dn':''}" data-ev="${t.id}" style="top:${top}px;height:${n===7?40:44}px;border-left-color:${t.priority?`var(--p${t.priority})`:'var(--accent)'}">${esc(t.title)}${n<7?`<small>${t.time}</small>`:''}</button>`}).join('')}${d===tdy?`<div class="nowl" style="top:${nowTop}px"></div>`:''}</div>`;
+  });
+  return h+'</div></div></div><p class="note" style="margin:8px 4px 0">Нажмите на пустое место в сетке, чтобы добавить задачу на это время.</p>';
 }
 function dayAgenda(d,compact){
   const ts=tasksOn(d);const dd=pd(d);const tdy=today();
@@ -1466,7 +1564,7 @@ function renderMore(){
     <p class="note">Веб-приложение присылает уведомления, пока оно открыто или недавно свёрнуто. Для важных дел нажмите в задаче «📅 В Календарь iPhone» — тогда напомнит системный Календарь, даже если приложение закрыто.</p></div>
    <div class="card sec mt"><h3>💾 Где хранятся данные</h3>
     <p class="note">Только на этом устройстве, в браузере. Никаких аккаунтов и серверов. ${storageOk?'':'<b style="color:var(--p3)">Сейчас хранилище недоступно — данные не сохранятся после закрытия.</b>'} Делайте резервную копию раз в пару недель: если долго не открывать веб-приложение, iOS может очистить его данные.</p></div>
-   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v2.5</p>`;
+   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v2.6</p>`;
   main.querySelectorAll('[data-acc]').forEach(b=>b.onclick=()=>{S.settings.accent=b.dataset.acc;save();applyAccent();render()});
   main.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{S.settings.theme=b.dataset.th;save();applyTheme();render()});
   const nb=$('#nBtn');if(nb)nb.onclick=async()=>{
