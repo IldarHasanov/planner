@@ -36,10 +36,12 @@ header h1{font-size:22px;margin:0;flex:1;font-weight:700;white-space:nowrap;over
 main{flex:1;padding:4px 16px calc(96px + var(--bot))}
 nav#tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:var(--bot)}
 nav#tabs .wrap{display:flex;width:100%;max-width:720px}
-nav#tabs button{flex:1;padding:8px 0 7px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--muted)}
+nav#tabs button{flex:1;padding:12px 0 10px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--muted)}
+nav#tabs button span{display:none}
+nav#tabs button svg{width:27px!important;height:27px!important}
 nav#tabs button svg{width:24px;height:24px}
 nav#tabs button.on{color:var(--accent)}
-#fab{position:fixed;right:max(18px,calc(50% - 342px));bottom:calc(74px + var(--bot));z-index:6;width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;box-shadow:0 8px 20px rgba(71,114,250,.4);display:grid;place-items:center}
+#fab{position:fixed;right:max(18px,calc(50% - 342px));bottom:calc(80px + var(--bot));z-index:6;width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;box-shadow:0 8px 20px rgba(71,114,250,.4);display:grid;place-items:center}
 #fab svg{width:28px;height:28px}
 .card{background:var(--card);border-radius:14px}
 .quick{display:flex;gap:8px;margin:6px 0 14px}
@@ -67,6 +69,29 @@ button.ghead{width:calc(100% - 8px);text-align:left;padding:4px 0;font-family:in
 .meta .red{color:var(--p3)}.meta .blue{color:var(--accent)}
 .meta svg{width:12px;height:12px;vertical-align:-1px}
 .tag{color:var(--accent)}
+.meta .lname{margin-left:auto;display:inline-flex;align-items:center;gap:3px;max-width:45%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.lem{font-size:1.05em;line-height:1;flex:none}
+.dic{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;color:#fff;flex:none;font-size:13px;font-weight:700}
+.dic svg{width:18px!important;height:18px!important}
+.ditem .lem{width:28px;text-align:center;font-size:20px}
+.ditem.child{padding-left:30px}
+.ditem .fold{margin-left:6px;color:var(--muted);width:26px;height:26px;display:grid;place-items:center;flex:none}
+.ditem .fold svg{width:16px!important;height:16px!important;transition:transform .2s}
+.ditem .fold.closed svg{transform:rotate(-90deg)}
+#drawer{display:flex;flex-direction:column}
+.dhead{display:flex;align-items:center;gap:8px;margin:0 6px 12px 12px}
+.dhead b{flex:1;font-size:20px}
+.dscroll{flex:1;overflow:auto;min-height:0}
+.dfoot{display:flex;align-items:center;border-top:1px solid var(--line);padding-top:8px;margin-top:6px}
+.dfoot .ditem{flex:1}
+.lcard{margin-bottom:12px}
+.lhead{display:flex;align-items:center;gap:10px;width:100%;padding:15px 14px;text-align:left;font-weight:700;font-size:17px;color:var(--accent)}
+.lhead .lem{font-size:22px}
+.lhead .cnt{margin-left:auto;color:var(--muted);font-weight:500;font-size:15px}
+.lhead svg{width:16px;height:16px;color:var(--muted);transition:transform .2s;transform:rotate(-90deg)}
+.lhead.open svg{transform:none}
+.lcard .task:first-of-type{border-top:1px solid var(--line)}
+#title .lem{margin-right:8px}
 .empty{text-align:center;color:var(--muted);padding:40px 20px}
 .empty b{display:block;font-size:40px;margin-bottom:6px}
 /* drawer */
@@ -90,15 +115,17 @@ button.ghead{width:calc(100% - 8px);text-align:left;padding:4px 0;font-family:in
 #sheetScrim{z-index:30}
 #sheet .in.compact{padding:12px 14px calc(var(--bot) + 10px);border-radius:16px 16px 0 0}
 #sheet.kb .in.compact{padding-bottom:10px}
-.qa-title{width:100%;min-width:0;border:0;background:transparent;outline:none;font-size:17px;font-weight:500;padding:4px 2px}
-.qa-note{width:100%;min-width:0;border:0;background:transparent;outline:none;font-size:14px;color:var(--muted);padding:4px 2px 8px}
+.qa-title{width:100%;min-width:0;border:0;background:transparent;outline:none;font-size:18px;font-weight:500;padding:8px 2px 26px}
+.qa-note{display:none;width:100%;min-width:0;border:0;background:transparent;outline:none;font-size:14px;color:var(--muted);padding:4px 2px 8px}
 .qa-bar{display:flex;align-items:center;gap:2px;min-width:0;overflow:hidden}
 .qa-btn{position:relative;flex:0 1 auto;min-width:36px;max-width:120px;height:36px;padding:0 7px;border-radius:9px;display:flex;align-items:center;gap:4px;color:var(--muted);font-size:13px;overflow:hidden;white-space:nowrap}
 .qa-btn.set{color:var(--accent)}
 .qa-btn span{overflow:hidden;text-overflow:ellipsis}
-@media (max-width:360px){.qa-btn{padding:0 4px;min-width:32px}#qaListL{display:none}}
+@media (max-width:360px){.qa-btn{padding:0 4px;min-width:32px}#qaListL{display:none}#qaListB .lem{font-size:17px}}
 .qa-btn svg{width:21px;height:21px;flex:none}
 .qa-btn.open{background:var(--accent-soft);color:var(--accent)}
+.qa-note.on{display:block}
+.qa-btn .lem{font-size:17px}
 .qa-panel{display:none;flex-wrap:nowrap;gap:6px;overflow-x:auto;padding:4px 0 8px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .qa-panel::-webkit-scrollbar{display:none}
 .qa-panel.on{display:flex}
@@ -289,11 +316,12 @@ const KEY='planner.v1';
 function defaults(){
   const inbox={id:'inbox',name:'Входящие',color:'#4772FA',system:true};
   return {
-    lists:[inbox,{id:uid(),name:'Работа',color:'#E5484D'},{id:uid(),name:'Личное',color:'#30A46C'}],
+    lists:[inbox,{id:uid(),name:'Работа',color:'#E5484D',emoji:'💼'},{id:uid(),name:'Личное',color:'#30A46C',emoji:'🏠'}],
+    folders:[],
     tasks:[],habits:[],
     pomo:{work:25,short:5,long:15,every:4,sessions:[],auto:false},
     timer:{mode:'work',running:false,endsAt:0,left:25*60,count:0,taskId:''},
-    settings:{theme:'auto',notify:false,defRemind:0},
+    settings:{theme:'auto',notify:false,defRemind:0,accent:'#4772FA'},
     seeded:false
   };
 }
@@ -306,6 +334,7 @@ function load(){
 let storageOk=true;
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){storageOk=false}}
 S=load();
+if(!Array.isArray(S.folders))S.folders=[];
 if(!S.seeded){
   const t=today();
   S.tasks.push(
@@ -321,13 +350,18 @@ const U={view:'tasks',list:'today',calMode:'month',calSel:today(),calRef:today()
 try{const v=sessionStorage.getItem('planner.ui');if(v)Object.assign(U,JSON.parse(v),{calSel:today(),calRef:today()})}catch(e){}
 function saveUI(){try{sessionStorage.setItem('planner.ui',JSON.stringify({view:U.view,list:U.list,calMode:U.calMode}))}catch(e){}}
 
-function applyTheme(){const t=S.settings.theme;if(t==='auto')delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=t}
+const ACCENTS=['#4772FA','#13946B','#E5484D','#F76B15','#8E4EC6','#D6409F','#1C1D21'];
+function applyAccent(){const c=S.settings.accent||'#4772FA';const r=document.documentElement.style;r.setProperty('--accent',c);const n=parseInt(c.slice(1),16);r.setProperty('--accent-soft',`rgba(${n>>16},${(n>>8)&255},${n&255},.14)`);const m=document.querySelector('meta[name=theme-color]');if(m)m.content=c}
+function applyTheme(){applyAccent();const t=S.settings.theme;if(t==='auto')delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=t}
 applyTheme();
 
 /* ========= task logic ========= */
 const REPEATS={'':'Не повторять',daily:'Каждый день',weekdays:'По будням',weekly:'Каждую неделю',monthly:'Каждый месяц',yearly:'Каждый год'};
 const REMINDS={'':'Без напоминания','0':'В момент события','5':'За 5 минут','15':'За 15 минут','30':'За 30 минут','60':'За 1 час','1440':'За 1 день'};
 function listById(id){return S.lists.find(l=>l.id===id)||S.lists[0]}
+function folderById(id){return S.folders.find(f=>f.id===id)}
+function listIcon(l){return l.emoji?`<span class="lem">${esc(l.emoji)}</span>`:`<i class="dot" style="background:${l.color}"></i>`}
+function listsIn(fid){return S.lists.filter(l=>!l.system&&(l.folderId||'')===(fid||''))}
 function nextDate(date,rep){
   const d=pd(date);
   if(rep==='daily')d.setDate(d.getDate()+1);
@@ -400,10 +434,12 @@ function smartFilter(key){
     case'done':return x=>x.done;
   }
   if(key.startsWith('tag:')){const g=key.slice(4);return x=>!x.done&&x.tags.includes(g)}
+  if(key.startsWith('folder:')){const fid=key.slice(7);return x=>!x.done&&(listById(x.listId).folderId||'')===fid}
   return x=>!x.done&&x.listId===key;
 }
-const SMART={today:['Сегодня',I.sun],tomorrow:['Завтра',I.sunrise],week:['7 дней',I.week],all:['Все задачи',I.all],inbox:['Входящие',I.inbox],done:['Выполненные',I.done]};
-function listTitle(key){if(SMART[key])return SMART[key][0];if(key.startsWith('tag:'))return'#'+key.slice(4);return listById(key).name}
+const SMART={today:['Сегодня',I.sun],tomorrow:['Завтра',I.sunrise],week:['Следующие 7 дней',I.week],all:['Все',I.all],inbox:['Входящие',I.inbox],done:['Выполненные',I.done]};
+function listTitle(key){if(SMART[key])return SMART[key][0];if(key.startsWith('tag:'))return'#'+key.slice(4);if(key.startsWith('folder:')){const f=folderById(key.slice(7));return f?f.name:'Папка'}return listById(key).name}
+function titleHTML(key){let em='';if(key.startsWith('folder:')){const f=folderById(key.slice(7));em=f&&f.emoji}else if(!SMART[key]&&!key.startsWith('tag:'))em=listById(key).emoji;return (em?`<span class="lem">${esc(em)}</span>`:'')+esc(listTitle(key))}
 function allTags(){const s=new Set();S.tasks.forEach(t=>!t.done&&t.tags.forEach(g=>s.add(g)));return[...s].sort()}
 
 /* ========= rendering ========= */
@@ -425,8 +461,8 @@ function taskRow(t,opts={}){
   if(t.remind!==null&&t.remind!==undefined&&t.time)meta.push(`<span>${I.bell}</span>`);
   if(t.subtasks.length)meta.push(`<span>${I.sub} ${t.subtasks.filter(s=>s.done).length}/${t.subtasks.length}</span>`);
   if(t.notes)meta.push(`<span>${I.note}</span>`);
-  if(!opts.hideList&&U.list!==t.listId)meta.push(`<span><i class="dot" style="background:${l.color};width:7px;height:7px;display:inline-block;margin:0 3px 0 0"></i>${esc(l.name)}</span>`);
   t.tags.forEach(g=>meta.push(`<span class="tag">#${esc(g)}</span>`));
+  if(!opts.hideList&&U.list!==t.listId)meta.push(`<span class="lname">${l.emoji?`<span class="lem">${esc(l.emoji)}</span>`:`<i class="dot" style="background:${l.color};width:7px;height:7px;display:inline-block;margin:0"></i>`}${esc(l.name)}</span>`);
   return `<div class="task ${t.done?'done':''} ${opts.ghost?'ghost':''}" data-open="${t.id}">
     <button class="chk p${t.priority||0} ${t.done?'on':''}" data-chk="${t.id}" aria-label="Выполнить"></button>
     <div class="tbody"><div class="ttitle">${esc(t.title)}</div>${meta.length?`<div class="meta">${meta.join('')}</div>`:''}</div></div>`;
@@ -438,7 +474,10 @@ function group(title,items,cls=''){
   return `<div class="group"><button class="ghead ${cls} ${closed?'closed':''}" data-g="${esc(title)}" aria-expanded="${!closed}">${I.chev}<span>${title}</span><span class="cnt">${items.length}</span></button>${closed?'':`<div class="card">${items.map(x=>typeof x==='string'?x:taskRow(x)).join('')}</div>`}</div>`;
 }
 function renderTasks(){
-  $('#title').textContent=listTitle(U.list);
+  if(U.list.startsWith('folder:')&&!folderById(U.list.slice(7)))U.list='today';
+  if(!SMART[U.list]&&!U.list.startsWith('tag:')&&!U.list.startsWith('folder:')&&!S.lists.find(l=>l.id===U.list))U.list='today';
+  $('#title').innerHTML=titleHTML(U.list);
+  if(U.list.startsWith('folder:')){renderFolder();return}
   const tdy=today();
   let html='';
   if(U.list!=='done'){
@@ -481,11 +520,24 @@ function renderTasks(){
   bindTaskEvents();
   const qf=$('#quickForm');
   if(qf)qf.onsubmit=e=>{e.preventDefault();const v=$('#quickInp').value.trim();if(!v)return;
-    const p=parseQuick(v);let listId='inbox';if(!SMART[U.list]&&!U.list.startsWith('tag:'))listId=U.list;
+    const p=parseQuick(v);let listId='inbox';if(!SMART[U.list]&&!U.list.startsWith('tag:')&&!U.list.startsWith('folder:'))listId=U.list;
     const tags=p.tags.slice();if(U.list.startsWith('tag:')&&!tags.includes(U.list.slice(4)))tags.push(U.list.slice(4));
     let date=p.date;if(!date&&(U.list==='today'||U.list==='week'))date=today();if(!date&&U.list==='tomorrow')date=addDays(today(),1);
     S.tasks.push(newTask({title:p.title||v,listId,priority:p.priority,date,time:p.time,tags,remind:p.time?(S.settings.defRemind??0):null}));
     save();render();setTimeout(()=>{const i=$('#quickInp');i&&i.focus()},0);};
+}
+function renderFolder(){
+  const fid=U.list.slice(7);const ls=listsIn(fid);let html='';
+  if(!ls.length)html=`<div class="empty"><b>📁</b>В папке пока нет списков.<br><br><button class="btn" id="fAdd">Добавить список</button></div>`;
+  ls.forEach(l=>{
+    const ts=S.tasks.filter(t=>!t.done&&t.listId===l.id).sort(sortTasks);
+    const key='fl:'+l.id;const c=S.settings.collapsed||{};const open=key in c?!c[key]:false;
+    html+=`<div class="card lcard"><button class="lhead ${open?'open':''}" data-fl="${l.id}">${listIcon(l)}<span>${esc(l.name)}</span><span class="cnt">${ts.length||''}</span>${I.chev}</button>${open?ts.map(t=>taskRow(t)).join(''):''}</div>`;
+  });
+  main.innerHTML=html;
+  main.querySelectorAll('[data-fl]').forEach(b=>b.onclick=()=>{const k='fl:'+b.dataset.fl;S.settings.collapsed=S.settings.collapsed||{};const c=S.settings.collapsed;c[k]=k in c?!c[k]:false;save();render()});
+  const fa=$('#fAdd');if(fa)fa.onclick=()=>editList(null,fid);
+  bindTaskEvents();
 }
 function bindTaskEvents(){
   main.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{const k=b.dataset.g;S.settings.collapsed=S.settings.collapsed||{};S.settings.collapsed[k]=!isCollapsed(k);save();render()});
@@ -496,19 +548,57 @@ function bindTaskEvents(){
 /* ----- drawer ----- */
 function openDrawer(){
   const cnt=k=>S.tasks.filter(smartFilter(k)).length||'';
-  let h=`<div style="font-weight:700;font-size:20px;margin:0 12px 10px">Планировщик</div>`;
-  ['today','tomorrow','week','all'].forEach(k=>h+=`<button class="ditem ${U.list===k?'on':''}" data-l="${k}">${SMART[k][1]}<span>${SMART[k][0]}</span><span class="cnt">${cnt(k)}</span></button>`);
-  h+=`<button class="ditem ${U.list==='inbox'?'on':''}" data-l="inbox">${I.inbox}<span>Входящие</span><span class="cnt">${cnt('inbox')}</span></button>`;
-  h+=`<div class="dsec">Списки<button id="addList" aria-label="Новый список">+</button></div>`;
-  S.lists.filter(l=>!l.system).forEach(l=>h+=`<div style="display:flex;align-items:center"><button class="ditem ${U.list===l.id?'on':''}" data-l="${l.id}"><i class="dot" style="background:${l.color}"></i><span>${esc(l.name)}</span><span class="cnt">${cnt(l.id)}</span></button><button class="more" data-edit="${l.id}" aria-label="Изменить">⋯</button></div>`);
+  const c=S.settings.collapsed||{};
+  const item=(key,icon,label,extra='',cls='')=>`<div style="display:flex;align-items:center"><button class="ditem ${cls} ${U.list===key?'on':''}" data-l="${esc(key)}">${icon}<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${label}</span><span class="cnt">${cnt(key)}</span>${extra}</button></div>`;
+  let h=`<div class="dhead"><b>Планировщик</b><button class="iconbtn" id="dSet" aria-label="Настройки">${I.more}</button></div><div class="dscroll">`;
+  h+=item('all',`<span class="dic" style="background:#4772FA">${I.all}</span>`,'Все');
+  h+=item('today',`<span class="dic" style="background:#F76B15">${new Date().getDate()}</span>`,'Сегодня');
+  h+=item('week',`<span class="dic" style="background:#F5A524">${I.week}</span>`,'Следующие 7 дней');
+  h+=item('inbox',`<span class="dic" style="background:#12A594">${I.inbox}</span>`,'Входящие');
+  h+=`<div class="dsec">Списки</div>`;
+  S.folders.forEach(f=>{
+    const closed=!!c['fd:'+f.id];
+    h+=`<div style="display:flex;align-items:center"><button class="ditem ${U.list==='folder:'+f.id?'on':''}" data-l="folder:${f.id}">${f.emoji?`<span class="lem">${esc(f.emoji)}</span>`:`<span class="lem">📁</span>`}<span>${esc(f.name)}</span><span class="cnt">${cnt('folder:'+f.id)}</span><span class="fold ${closed?'closed':''}" data-fold="${f.id}">${I.chev}</span></button><button class="more" data-fedit="${f.id}" aria-label="Изменить папку">⋯</button></div>`;
+    if(!closed)listsIn(f.id).forEach(l=>h+=`<div style="display:flex;align-items:center"><button class="ditem child ${U.list===l.id?'on':''}" data-l="${l.id}">${listIcon(l)}<span>${esc(l.name)}</span><span class="cnt">${cnt(l.id)}</span></button><button class="more" data-edit="${l.id}" aria-label="Изменить">⋯</button></div>`);
+  });
+  listsIn('').forEach(l=>h+=`<div style="display:flex;align-items:center"><button class="ditem ${U.list===l.id?'on':''}" data-l="${l.id}">${listIcon(l)}<span>${esc(l.name)}</span><span class="cnt">${cnt(l.id)}</span></button><button class="more" data-edit="${l.id}" aria-label="Изменить">⋯</button></div>`);
   const tags=allTags();
-  if(tags.length){h+=`<div class="dsec">Теги</div>`;tags.forEach(g=>h+=`<button class="ditem ${U.list==='tag:'+g?'on':''}" data-l="tag:${esc(g)}">${I.tag}<span>${esc(g)}</span><span class="cnt">${cnt('tag:'+g)}</span></button>`)}
-  h+=`<div class="dsec"></div><button class="ditem ${U.list==='done'?'on':''}" data-l="done">${I.done}<span>Выполненные</span></button>`;
+  if(tags.length){h+=`<div class="dsec">Теги</div>`;tags.forEach(g=>h+=item('tag:'+g,`<span class="lem" style="color:var(--accent)">#</span>`,esc(g)))}
+  h+=`<div class="dsec"></div>`+item('done',`<span class="dic" style="background:#8A8F98">${I.done}</span>`,'Выполненные');
+  h+=`</div><div class="dfoot"><button class="ditem" id="addAny">${I.plus.replace('<svg','<svg style="width:22px;height:22px"')}<span>Добавить</span></button></div>`;
   const d=$('#drawer');d.innerHTML=h;
-  d.querySelectorAll('[data-l]').forEach(b=>b.onclick=()=>{U.list=b.dataset.l;U.showDone=false;closeDrawer();render()});
+  d.querySelectorAll('[data-fold]').forEach(b=>b.onclick=e=>{e.stopPropagation();const k='fd:'+b.dataset.fold;S.settings.collapsed=S.settings.collapsed||{};S.settings.collapsed[k]=!S.settings.collapsed[k];save();openDrawer()});
+  d.querySelectorAll('[data-l]').forEach(b=>b.onclick=()=>{U.list=b.dataset.l;closeDrawer();U.view='tasks';render()});
   d.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>{closeDrawer();editList(b.dataset.edit)});
-  $('#addList').onclick=()=>{closeDrawer();editList(null)};
+  d.querySelectorAll('[data-fedit]').forEach(b=>b.onclick=()=>{closeDrawer();editFolder(b.dataset.fedit)});
+  $('#addAny').onclick=()=>{closeDrawer();addMenu()};
+  $('#dSet').onclick=()=>{closeDrawer();U.view='more';render()};
   d.classList.add('on');$('#scrim').classList.add('on');
+}
+function addMenu(){
+  openSheet(`<div class="shead"><h2>Добавить</h2></div>
+   <div class="card" style="background:var(--bg)"><button class="lrow" style="width:100%;text-align:left" id="amList"><span style="font-size:22px">📋</span><div class="l">Список<small>например «Покупки» или «Учёба»</small></div></button>
+   <button class="lrow" style="width:100%;text-align:left" id="amFolder"><span style="font-size:22px">📁</span><div class="l">Папка<small>объединяет несколько списков, как «Личный»</small></div></button></div>`);
+  SI('#amList').onclick=()=>{closeSheet(true);editList(null)};
+  SI('#amFolder').onclick=()=>{closeSheet(true);editFolder(null)};
+}
+const LEMOJI=['📋','📝','💼','🏠','📦','🛒','📖','💡','🎯','💪','💰','✈️','🎁','🧹','👶','❤️','🎓','🔧','📞','🗂️'];
+function emojiPicker(cur){return `<div class="chips" id="emj"><button class="chip ${!cur?'on':''}" data-em="">нет</button>${LEMOJI.map(e=>`<button class="chip ${e===cur?'on':''}" data-em="${e}">${e}</button>`).join('')}</div>`}
+function bindEmoji(st){SA('[data-em]').forEach(b=>b.onclick=()=>{st.emoji=b.dataset.em;SA('[data-em]').forEach(x=>x.classList.toggle('on',x===b))})}
+function editFolder(id){
+  const f=id?folderById(id):{name:'',emoji:'📁'};const st={emoji:f.emoji||''};
+  openSheet(`<div class="shead"><h2>${id?'Изменить папку':'Новая папка'}</h2></div>
+    <div class="field"><input class="inp" id="fname" placeholder="Название папки, например «Личный»" value="${esc(f.name)}"></div>
+    <div class="field"><label>Иконка</label>${emojiPicker(st.emoji)}</div>
+    ${id?'':`<p class="note">После создания добавьте в папку списки: при создании или изменении списка выберите эту папку.</p>`}
+    <div class="actions">${id?'<button class="btn danger" id="fdel">Удалить</button>':''}<span class="sp"></span><button class="btn sec" id="fcancel">Отмена</button><button class="btn" id="fsave">Сохранить</button></div>`);
+  bindEmoji(st);
+  SI('#fcancel').onclick=()=>closeSheet();
+  SI('#fsave').onclick=()=>{const n=SI('#fname').value.trim();if(!n){SI('#fname').focus();return}
+    if(id)Object.assign(f,{name:n,emoji:st.emoji});else{const nf={id:uid(),name:n,emoji:st.emoji};S.folders.push(nf);U.list='folder:'+nf.id;U.view='tasks'}
+    save();closeSheet();render()};
+  if(id)SI('#fdel').onclick=()=>confirmBox(`Удалить папку «${esc(f.name)}»?`,'Списки и задачи останутся — они просто выйдут из папки.',()=>{
+    S.lists.forEach(l=>{if(l.folderId===id)delete l.folderId});S.folders=S.folders.filter(x=>x.id!==id);if(U.list==='folder:'+id)U.list='today';save();render()});
 }
 function closeDrawer(){$('#drawer').classList.remove('on');$('#scrim').classList.remove('on')}
 $('#scrim').onclick=closeDrawer;
@@ -558,23 +648,28 @@ $('#sheetScrim').onclick=()=>closeSheet();
 const SI=s=>$('#sheet .in').querySelector(s);
 const SA=s=>$('#sheet .in').querySelectorAll(s);
 
-function editList(id){
-  const l=id?S.lists.find(x=>x.id===id):{name:'',color:COLORS[S.lists.length%COLORS.length]};
-  let color=l.color;
+function editList(id,inFolder){
+  const l=id?S.lists.find(x=>x.id===id):{name:'',color:COLORS[S.lists.length%COLORS.length],emoji:'',folderId:inFolder||''};
+  const st={color:l.color,emoji:l.emoji||''};
+  const fopts=`<option value="">— без папки —</option>`+S.folders.map(f=>`<option value="${f.id}" ${f.id===(l.folderId||'')?'selected':''}>${esc((f.emoji?f.emoji+' ':'')+f.name)}</option>`).join('');
   openSheet(`<div class="shead"><h2>${id?'Изменить список':'Новый список'}</h2></div>
     <div class="field"><input class="inp" id="lname" placeholder="Название" value="${esc(l.name)}"></div>
-    <div class="field"><label>Цвет</label><div class="chips">${COLORS.map(c=>`<button class="swatch ${c===color?'on':''}" data-c="${c}" style="background:${c}"></button>`).join('')}</div></div>
+    <div class="field"><label>Иконка</label>${emojiPicker(st.emoji)}</div>
+    <div class="field"><label>Цвет</label><div class="chips">${COLORS.map(c=>`<button class="swatch ${c===st.color?'on':''}" data-c="${c}" style="background:${c}"></button>`).join('')}</div></div>
+    <div class="field"><label>Папка</label><select class="inp" id="lfold">${fopts}</select></div>
     <div class="actions">${id?'<button class="btn danger" id="ldel">Удалить</button>':''}<span class="sp"></span><button class="btn sec" id="lcancel">Отмена</button><button class="btn" id="lsave">Сохранить</button></div>`);
-  SA('[data-c]').forEach(b=>b.onclick=()=>{color=b.dataset.c;SA('[data-c]').forEach(x=>x.classList.toggle('on',x===b))});
+  bindEmoji(st);
+  SA('[data-c]').forEach(b=>b.onclick=()=>{st.color=b.dataset.c;SA('[data-c]').forEach(x=>x.classList.toggle('on',x===b))});
   SI('#lcancel').onclick=()=>closeSheet();
-  SI('#lsave').onclick=()=>{const n=SI('#lname').value.trim();if(!n)return;
-    if(id){l.name=n;l.color=color}else{const nl={id:uid(),name:n,color};S.lists.push(nl);U.list=nl.id;U.view='tasks'}
+  SI('#lsave').onclick=()=>{const n=SI('#lname').value.trim();if(!n){SI('#lname').focus();return}
+    const fid=SI('#lfold').value;
+    if(id){Object.assign(l,{name:n,color:st.color,emoji:st.emoji});if(fid)l.folderId=fid;else delete l.folderId}
+    else{const nl={id:uid(),name:n,color:st.color,emoji:st.emoji};if(fid)nl.folderId=fid;S.lists.push(nl);U.list=nl.id;U.view='tasks'}
     save();closeSheet();render()};
   if(id)SI('#ldel').onclick=()=>{
     const n=S.tasks.filter(t=>t.listId===id).length;
     confirmBox(`Удалить список «${esc(l.name)}»?`,n?`${n} ${plural(n,'задача будет перенесена','задачи будут перенесены','задач будут перенесены')} во «Входящие».`:'',()=>{
       S.tasks.forEach(t=>{if(t.listId===id)t.listId='inbox'});S.lists=S.lists.filter(x=>x.id!==id);if(U.list===id)U.list='inbox';save();render()})};
-  setTimeout(()=>SI('#lname')&&!id&&SI('#lname').focus(),250);
 }
 function confirmBox(title,text,ok,okLabel='Удалить'){
   openSheet(`<div class="shead"><h2>${title}</h2></div>${text?`<p class="note">${text}</p>`:''}
@@ -585,16 +680,15 @@ function confirmBox(title,text,ok,okLabel='Удалить'){
 /* ----- quick add (компактное окно над клавиатурой) ----- */
 function quickAdd(pre={}){
   const st={date:pre.date||'',time:'',priority:0,listId:pre.listId||'inbox',tags:(pre.tags||[]).slice()};
-  openSheet(`<input class="qa-title" id="qaTitle" placeholder="Что нужно сделать?" autocomplete="off" enterkeyhint="send">
+  openSheet(`<input class="qa-title" id="qaTitle" placeholder="Что бы вы хотели сделать?" autocomplete="off" enterkeyhint="send">
     <input class="qa-note" id="qaNote" placeholder="Описание" autocomplete="off">
     <div class="qa-panel" id="qaPanel"></div>
     <div class="qa-bar">
       <button class="qa-btn" id="qaDateB" aria-label="Дата">${I.cal}<span id="qaDateL"></span></button>
-      <button class="qa-btn" id="qaTimeB" aria-label="Время">${I.clock}<span id="qaTimeL"></span></button>
       <button class="qa-btn" id="qaPri" aria-label="Приоритет">${I.flag}</button>
-      <button class="qa-btn" id="qaListB" aria-label="Список">${I.folder}<span id="qaListL"></span></button>
-      <button class="qa-btn" id="qaTag" aria-label="Тег" style="font-size:19px;font-weight:600">#</button>
-      <button class="qa-btn" id="qaExp" aria-label="Подробнее">${I.expand}</button>
+      <button class="qa-btn" id="qaTag" aria-label="Тег">${I.tag}</button>
+      <button class="qa-btn" id="qaListB" aria-label="Список"><span id="qaListI"></span><span id="qaListL"></span></button>
+      <button class="qa-btn" id="qaMore" aria-label="Ещё" style="font-size:20px;letter-spacing:1px">⋯</button>
       <span class="qa-sp"></span>
       <button class="qa-send" id="qaSend" aria-label="Добавить" disabled>${I.send}</button>
     </div>`,()=>{if(SI('#qaTitle').value.trim())add(false)},true);
@@ -623,12 +717,20 @@ function quickAdd(pre={}){
     }else if(kind==='pri'){
       html=[3,2,1,0].map(p=>chip(p,`<span style="color:${p?`var(--p${p})`:'var(--muted)'}">⚑</span> ${PRI[p]}`,st.priority===p)).join('');
     }else if(kind==='list'){
-      html=S.lists.map(l=>chip(l.id,`<i class="dot" style="background:${l.color};width:8px;height:8px;display:inline-block;margin:0 4px 0 0"></i>${esc(l.name)}`,st.listId===l.id)).join('');
+      html=S.lists.map(l=>chip(l.id,(l.emoji?esc(l.emoji)+' ':`<i class="dot" style="background:${l.color};width:8px;height:8px;display:inline-block;margin:0 4px 0 0"></i>`)+esc(l.name),st.listId===l.id)).join('');
+    }else if(kind==='more'){
+      html=chip('time','🕐 Время',!!st.time)+chip('note','📝 Описание',SI('#qaNote').classList.contains('on'))+chip('exp','⤢ Подробнее',false);
     }
     pn.innerHTML=html;pn.classList.add('on');
-    SI({date:'#qaDateB',time:'#qaTimeB',pri:'#qaPri',list:'#qaListB'}[kind]).classList.add('open');
+    SI({date:'#qaDateB',time:'#qaMore',pri:'#qaPri',list:'#qaListB',more:'#qaMore'}[kind]).classList.add('open');
     pn.querySelectorAll('button.chip').forEach(c=>{keep(c);c.onclick=()=>{
       const v=c.dataset.v;
+      if(kind==='more'){
+        panel='';pn.innerHTML='';pn.classList.remove('on');SA('.qa-bar .qa-btn').forEach(b=>b.classList.remove('open'));
+        if(v==='time'){showPanel('time');return}
+        if(v==='note'){const n=SI('#qaNote');n.classList.add('on');lastInp=n;n.focus();return}
+        if(v==='exp'){expand();return}
+      }
       if(kind==='date')st.date=v;
       else if(kind==='time'){st.time=v;if(v&&!st.date)st.date=today()}
       else if(kind==='pri')st.priority=+v;
@@ -642,10 +744,9 @@ function quickAdd(pre={}){
     if(tx)tx.onchange=()=>{st.time=tx.value;if(st.time&&!st.date)st.date=today();fin()};
   }
   function draw(){
-    SI('#qaDateL').textContent=st.date?fmtDate(st.date):'';SI('#qaDateB').classList.toggle('set',!!st.date);
-    SI('#qaTimeL').textContent=st.time||'';SI('#qaTimeB').classList.toggle('set',!!st.time);
+    SI('#qaDateL').textContent=st.date?fmtDate(st.date)+(st.time?', '+st.time:''):(st.time||'');SI('#qaDateB').classList.toggle('set',!!(st.date||st.time));
     const pb=SI('#qaPri');pb.style.color=st.priority?`var(--p${st.priority})`:'';
-    const l=listById(st.listId);SI('#qaListL').textContent=st.listId==='inbox'?'':l.name;SI('#qaListB').classList.toggle('set',st.listId!=='inbox');
+    const l=listById(st.listId);SI('#qaListI').innerHTML=l.emoji?`<span class="lem">${esc(l.emoji)}</span>`:I.folder;SI('#qaListL').textContent=l.name;SI('#qaListB').classList.add('set');
     SI('#qaSend').disabled=!ti.value.trim();
   }
   function add(keepOpen){
@@ -661,15 +762,15 @@ function quickAdd(pre={}){
   ti.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();add(true)}};
   SI('#qaNote').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();add(true)}};
   SI('#qaDateB').onclick=()=>showPanel('date');
-  SI('#qaTimeB').onclick=()=>showPanel('time');
+  SI('#qaMore').onclick=()=>showPanel('more');
   SI('#qaPri').onclick=()=>showPanel('pri');
   SI('#qaListB').onclick=()=>showPanel('list');
   SI('#qaTag').onclick=()=>{const v=ti.value;ti.value=v+(v&&!v.endsWith(' ')?' ':'')+'#';lastInp=ti;ti.focus();ti.setSelectionRange(ti.value.length,ti.value.length);draw()};
-  SI('#qaExp').onclick=()=>{
+  function expand(){
     const p=parseQuick(ti.value.trim());
     const preset={title:p.title||ti.value.trim(),notes:SI('#qaNote').value,listId:st.listId,priority:p.priority||st.priority,date:p.date||st.date,time:p.time||st.time,tags:[...new Set([...st.tags,...p.tags])]};
     if(preset.time)preset.remind=S.settings.defRemind??0;
-    closeSheet(true);openTask(null,preset)};
+    closeSheet(true);openTask(null,preset)}
   SI('#qaSend').onclick=()=>add(true);
   draw();
   ti.focus(); // синхронно в обработчике нажатия — так iOS сразу открывает клавиатуру
@@ -687,7 +788,7 @@ function openTask(id,preset){
   const isNew=!id;
   const orig=id?S.tasks.find(t=>t.id===id):null;if(id&&!orig)return;
   const t=isNew?newTask(preset||{}):JSON.parse(JSON.stringify(orig));
-  const listOpts=S.lists.map(l=>`<option value="${l.id}" ${l.id===t.listId?'selected':''}>${esc(l.name)}</option>`).join('');
+  const listOpts=S.lists.map(l=>`<option value="${l.id}" ${l.id===t.listId?'selected':''}>${esc((l.emoji?l.emoji+' ':'')+l.name)}</option>`).join('');
   const sel=(obj,val)=>Object.entries(obj).map(([k,v])=>`<option value="${k}" ${String(val??'')===k?'selected':''}>${v}</option>`).join('');
   openSheet(`
     <div class="shead"><button class="chk p${t.priority} ${t.done?'on':''}" id="edChk" style="width:24px;height:24px"></button><span class="sp" style="flex:1"></span>
@@ -981,6 +1082,7 @@ function renderMore(){
   main.innerHTML=`
    <div class="card">
     <div class="lrow"><div class="l">Тема</div><div class="seg" style="width:200px">${[['auto','Авто'],['light','Светлая'],['dark','Тёмная']].map(([k,v])=>`<button data-th="${k}" class="${S.settings.theme===k?'on':''}">${v}</button>`).join('')}</div></div>
+    <div class="lrow"><div class="l">Цвет оформления</div><div class="chips" style="flex-wrap:nowrap">${ACCENTS.map(c=>`<button class="swatch ${c===(S.settings.accent||'#4772FA')?'on':''}" data-acc="${c}" style="background:${c};width:26px;height:26px"></button>`).join('')}</div></div>
     <div class="lrow"><div class="l">Уведомления<small>${nstate}</small></div>${perm!=='unsupported'&&perm!=='denied'?`<button class="btn sm ${S.settings.notify&&perm==='granted'?'sec':''}" id="nBtn">${S.settings.notify&&perm==='granted'?'Выключить':'Включить'}</button>`:''}</div>
     <div class="lrow"><div class="l">Напоминание по умолчанию<small>для задач со временем</small></div><select class="inp" id="defRem" style="width:auto">${Object.entries(REMINDS).map(([k,v])=>`<option value="${k}" ${String(S.settings.defRemind??'')===k?'selected':''}>${v}</option>`).join('')}</select></div>
     ${S.settings.notify&&perm==='granted'?`<div class="lrow"><div class="l">Проверить уведомление</div><button class="btn sec sm" id="nTest">Тест</button></div>`:''}
@@ -998,7 +1100,8 @@ function renderMore(){
     <p class="note">Веб-приложение присылает уведомления, пока оно открыто или недавно свёрнуто. Для важных дел нажмите в задаче «📅 В Календарь iPhone» — тогда напомнит системный Календарь, даже если приложение закрыто.</p></div>
    <div class="card sec mt"><h3>💾 Где хранятся данные</h3>
     <p class="note">Только на этом устройстве, в браузере. Никаких аккаунтов и серверов. ${storageOk?'':'<b style="color:var(--p3)">Сейчас хранилище недоступно — данные не сохранятся после закрытия.</b>'} Делайте резервную копию раз в пару недель: если долго не открывать веб-приложение, iOS может очистить его данные.</p></div>
-   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v1.6</p>`;
+   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v2.0</p>`;
+  main.querySelectorAll('[data-acc]').forEach(b=>b.onclick=()=>{S.settings.accent=b.dataset.acc;save();applyAccent();render()});
   main.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{S.settings.theme=b.dataset.th;save();applyTheme();render()});
   const nb=$('#nBtn');if(nb)nb.onclick=async()=>{
     if(S.settings.notify&&Notification.permission==='granted'){S.settings.notify=false;save();render();return}
@@ -1045,7 +1148,7 @@ $('#menuBtn').innerHTML=I.menu;$('#menuBtn').onclick=openDrawer;
 $('#fab').innerHTML=I.plus;
 $('#fab').onclick=()=>{
   if(U.view==='tasks'){
-    const pre={};if(!SMART[U.list]&&!U.list.startsWith('tag:'))pre.listId=U.list;
+    const pre={};if(U.list.startsWith('folder:')){const ls=listsIn(U.list.slice(7));if(ls[0])pre.listId=ls[0].id}else if(!SMART[U.list]&&!U.list.startsWith('tag:'))pre.listId=U.list;
     if(U.list==='today'||U.list==='week')pre.date=today();if(U.list==='tomorrow')pre.date=addDays(today(),1);
     if(U.list.startsWith('tag:'))pre.tags=[U.list.slice(4)];quickAdd(pre)}
   else if(U.view==='cal')quickAdd({date:U.calSel});
