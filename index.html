@@ -248,7 +248,9 @@ button.ghead{width:calc(100% - 8px);text-align:left;padding:4px 0;font-family:in
 .nowl::before{content:"";position:absolute;left:-4px;top:-3px;width:8px;height:8px;border-radius:50%;background:var(--p3)}
 html.lock,html.lock body{overflow:hidden;overscroll-behavior:none}
 #sheet .in,#dp .dpIn{will-change:transform}
-.wkstrip{display:grid;grid-template-columns:repeat(7,1fr);margin:0 0 8px}
+.wkwrap{overflow:hidden;margin:0 0 8px;touch-action:pan-y}
+.wktrack{display:flex;width:300%;transform:translateX(-33.3333%);will-change:transform}
+.wkstrip{display:grid;grid-template-columns:repeat(7,1fr);width:33.3333%;flex:none}
 .wkstrip button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 0}
 .wkstrip small{font-size:11px;color:var(--muted)}
 .wkstrip b{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:15px;font-weight:600}
@@ -1376,7 +1378,7 @@ function renderCal(){
   main.querySelectorAll('[data-ev]').forEach(b=>b.onclick=e=>{e.stopPropagation();if(b._dragged)return;openTask(b.dataset.ev)});
   main.querySelectorAll('.ev').forEach(evDrag);
   
-  main.querySelectorAll('[data-wk]').forEach(b=>b.onclick=()=>{U.calRef=U.calSel=b.dataset.wk;render()});
+  bindStrip();
   main.querySelectorAll('[data-adm]').forEach(b=>b.onclick=e=>{e.stopPropagation();U.allDayOpen=b.dataset.adm==='1';render()});
   fitCal();
   const tb=main.querySelector('.tgb');if(tb){const key=mode+U.calRef;if(U.tgKeep&&U.tgKeep.key===key)tb.scrollTop=U.tgKeep.top;else{const hasToday=!!tb.querySelector('.nowl');const hh=+(tb.querySelector('[data-hh]')||{dataset:{hh:48}}).dataset.hh;tb.scrollTop=Math.max(0,(hasToday?Math.min(new Date().getHours(),20)-1:7)*hh)}
@@ -1388,7 +1390,7 @@ function fitCal(){if(!main.classList.contains('calfit'))return;window.scrollTo(0
 window.addEventListener('resize',fitCal);
 /* свайп влево/вправо только по полосе дней / сетке календаря */
 (function(){
-  const ZONE='.wkstrip,.tgh,.mg,.yr,.card .grid7';
+  const ZONE='.tgh,.mg,.yr,.card .grid7';
   let x0=null,y0=0,ok=false,zone=null;
   main.addEventListener('touchstart',e=>{zone=null;if(U.view!=='cal'||e.touches.length!==1){x0=null;return}zone=e.target.closest(ZONE);if(!zone){x0=null;return}x0=e.touches[0].clientX;y0=e.touches[0].clientY;ok=true},{passive:true});
   main.addEventListener('touchmove',e=>{if(x0===null||!ok)return;const dx=e.touches[0].clientX-x0,dy=e.touches[0].clientY-y0;
@@ -1478,15 +1480,33 @@ function evDrag(el){
   el.addEventListener('contextmenu',e=>e.preventDefault());
 }
 function evColor(t){const l=listById(t.listId);const c=t.priority===3?'#E5484D':t.priority===2?'#F5A524':(l.color&&l.color.startsWith('#')?l.color:(S.settings.accent||'#4772FA'));return c}
+function stripPane(mon,sel){const tdy=today();return `<div class="wkstrip">${Array.from({length:7},(_,i)=>{const d=addDays(mon,i);const has=tasksOn(d).length>0;return `<button class="${d===sel?'on':''} ${d===tdy?'t':''}" data-wk="${d}"><small>${WD[i]}</small><b>${pd(d).getDate()}</b><i style="${has?'':'visibility:hidden'}"></i></button>`}).join('')}</div>`}
+function stripTrack(mon,sel){return `<div class="wktrack">${stripPane(addDays(mon,-7),sel)}${stripPane(mon,sel)}${stripPane(addDays(mon,7),sel)}</div>`}
+function bindStrip(){
+  const wrap=main.querySelector('.wkwrap');if(!wrap)return;
+  wrap.querySelectorAll('[data-wk]').forEach(b=>b.onclick=()=>{if(wrap._moved)return;U.calRef=U.calSel=b.dataset.wk;render()});
+  let x0=null,y0=0,dx=0,horiz=null;const W=()=>wrap.offsetWidth;
+  const tr=()=>wrap.querySelector('.wktrack');
+  wrap.ontouchstart=e=>{if(e.touches.length!==1)return;x0=e.touches[0].clientX;y0=e.touches[0].clientY;dx=0;horiz=null;wrap._moved=false;tr().style.transition='none'};
+  wrap.ontouchmove=e=>{if(x0===null)return;dx=e.touches[0].clientX-x0;const dy=e.touches[0].clientY-y0;
+    if(horiz===null&&(Math.abs(dx)>6||Math.abs(dy)>6))horiz=Math.abs(dx)>Math.abs(dy);
+    if(!horiz)return;wrap._moved=true;tr().style.transform=`translateX(calc(-33.3333% + ${dx}px))`};
+  wrap.ontouchend=()=>{if(x0===null)return;x0=null;if(!horiz){return}
+    const t=tr();t.style.transition='transform .28s cubic-bezier(.2,.8,.2,1)';
+    const dir=Math.abs(dx)>W()*.18?(dx<0?1:-1):0;
+    t.style.transform=`translateX(${dir===1?'-66.6667%':dir===-1?'0%':'-33.3333%'})`;
+    const done=()=>{t.removeEventListener('transitionend',done);if(dir){U.stripMon=addDays(U.stripMon,dir*7);wrap.innerHTML=stripTrack(U.stripMon,U.calSel);bindStrip()}setTimeout(()=>wrap._moved=false,50)};
+    t.addEventListener('transitionend',done);setTimeout(()=>{if(wrap.contains(t))done()},350)};
+}
 function timeGrid(start,n){
   const tdy=today();const days=[];for(let i=0;i<n;i++)days.push(addDays(start,i));
   const HH=n===1?60:48;const DUR=n===1?55:55;const dark=isDark();const card=dark?'#1C1D22':'#FFFFFF';
   const cols=`${n===1?36:44}px repeat(${n},minmax(0,1fr))`;
   let h='';
   if(n===1){
-    // полоса недели, как в TickTick
-    const mon=addDays(start,-wdi(start));
-    h+=`<div class="wkstrip">${Array.from({length:7},(_,i)=>{const d=addDays(mon,i);const has=tasksOn(d).length>0;return `<button class="${d===start?'on':''} ${d===tdy?'t':''}" data-wk="${d}"><small>${WD[i]}</small><b>${pd(d).getDate()}</b><i style="${has?'':'visibility:hidden'}"></i></button>`}).join('')}</div>`;
+    // полоса недели, как в TickTick (листается свайпом, дата не меняется)
+    if(U.stripAnchor!==start){U.stripMon=addDays(start,-wdi(start));U.stripAnchor=start}
+    h+=`<div class="wkwrap">${stripTrack(U.stripMon,start)}</div>`;
   }
   h+=`<div class="tgw">`;
   if(n>1)h+=`<div class="tgh" style="grid-template-columns:${cols}"><div></div>${days.map(d=>`<div class="${d===tdy?'t':''}">${WD[wdi(d)]}<b>${pd(d).getDate()}</b></div>`).join('')}</div>`;
@@ -1697,7 +1717,7 @@ function renderMore(){
     <p class="note">Веб-приложение присылает уведомления, пока оно открыто или недавно свёрнуто. Для важных дел нажмите в задаче «📅 В Календарь iPhone» — тогда напомнит системный Календарь, даже если приложение закрыто.</p></div>
    <div class="card sec mt"><h3>💾 Где хранятся данные</h3>
     <p class="note">Только на этом устройстве, в браузере. Никаких аккаунтов и серверов. ${storageOk?'':'<b style="color:var(--p3)">Сейчас хранилище недоступно — данные не сохранятся после закрытия.</b>'} Делайте резервную копию раз в пару недель: если долго не открывать веб-приложение, iOS может очистить его данные.</p></div>
-   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v3.4</p>`;
+   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v3.5</p>`;
   main.querySelectorAll('[data-acc]').forEach(b=>b.onclick=()=>{S.settings.accent=b.dataset.acc;save();applyAccent();render()});
   main.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{S.settings.theme=b.dataset.th;save();applyTheme();render()});
   const nb=$('#nBtn');if(nb)nb.onclick=async()=>{
