@@ -209,7 +209,9 @@ button.ghead{width:calc(100% - 8px);text-align:left;padding:4px 0;font-family:in
 /* calendar views */
 .calhd{display:flex;align-items:center;gap:4px;margin-bottom:8px}
 .calhd .ttl{flex:1;font-weight:700;font-size:17px;text-transform:capitalize;text-align:center}
-.yr{display:grid;grid-template-columns:repeat(3,1fr);align-items:start;gap:22px 10px;padding-top:8px;border-top:1px solid var(--line)}
+.ysec{padding:6px 0 26px}
+.yttl{font-size:34px;font-weight:700;margin:4px 0 10px;letter-spacing:-.5px}
+.yr{display:grid;grid-template-columns:repeat(3,1fr);align-items:start;gap:22px 10px;padding-top:16px;border-top:1px solid var(--line)}
 .ym{border-radius:10px;text-align:left;padding:0;display:flex;flex-direction:column;align-self:start;min-width:0}
 .ym b{display:block;font-size:20px;font-weight:700;margin:0 0 8px 0}
 .ym.cur b{color:var(--text)}
@@ -659,7 +661,9 @@ function allTags(){const s=new Set();S.tasks.forEach(t=>!t.done&&t.tags.forEach(
 
 /* ========= rendering ========= */
 const main=$('#main');
+function scrollTop0(){window.scrollTo(0,0);document.body.scrollTop=0;document.documentElement.scrollTop=0}
 function render(){
+  if(U._lastMode!==U.view+'/'+U.calMode){U._lastMode=U.view+'/'+U.calMode;scrollTop0()}
   saveUI();
   if(U.view!=='tasks')U.sel=null;
   document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===U.view));
@@ -1357,7 +1361,7 @@ function renderCal(){
     const rel=s===tdy?'Сегодня':s===addDays(tdy,1)?'Завтра':s===addDays(tdy,-1)?'Вчера':`${a.getDate()} ${MONG[a.getMonth()]}, ${WD[wdi(s)].toLowerCase()}`;
     ttl=n===1?`<small style="display:block;font-size:12px;font-weight:500;color:var(--muted)">${MON[a.getMonth()]}${a.getFullYear()!==new Date().getFullYear()?' '+a.getFullYear():''}</small>${rel}`:(a.getMonth()===bb.getMonth()?`${a.getDate()}–${bb.getDate()} ${MONG[a.getMonth()]}`:`${a.getDate()} ${MONS[a.getMonth()]} – ${bb.getDate()} ${MONS[bb.getMonth()]}`)}
   let h=`<div class="calhd"><button class="iconbtn" id="cPrev">${I.left}</button><button class="ttl" id="cToday" style="${mode==='day'||mode==='week'||mode==='3day'?'text-transform:none':''}" aria-label="Перейти к сегодня">${ttl}</button><button class="iconbtn" id="cNext">${I.right}</button></div>`;
-  if(mode==='year')h+=yearView(ref.getFullYear());
+  if(mode==='year'){const Y=ref.getFullYear();U.yrMin=Y-2;U.yrMax=Y+2;h=`<div id="yrs">${[Y-2,Y-1,Y,Y+1,Y+2].map(yearBlock).join('')}</div>`}
   else if(mode==='list'){h+=miniMonth(ref);h+=`<div class="agenda">${dayAgenda(U.calSel)}</div>`}
   else if(mode==='month'){h+=bigMonth(ref);h+=`<div class="agenda">${dayAgenda(U.calSel)}</div>`}
   else{const n=mode==='week'?7:mode==='3day'?3:1;const s=mode==='week'?addDays(U.calRef,-wdi(U.calRef)):U.calRef;h+=timeGrid(s,n);main.classList.add('calfit');document.documentElement.classList.add('calfixed')}
@@ -1367,12 +1371,11 @@ function renderCal(){
     else if(mode==='list'||mode==='month'){r.setDate(1);r.setMonth(r.getMonth()+d);U.calRef=ds(r)}
     else{const n=mode==='week'?7:mode==='3day'?3:1;U.calRef=addDays(U.calRef,d*n);U.calSel=U.calRef}
     render()};
-  $('#cPrev').onclick=()=>step(-1);$('#cNext').onclick=()=>step(1);
+  if($('#cPrev')){$('#cPrev').onclick=()=>step(-1);$('#cNext').onclick=()=>step(1)}
   U.calStep=step;
-  $('#cToday').onclick=()=>{U.calSel=U.calRef=today();render()};
+  if($('#cToday'))$('#cToday').onclick=()=>{U.calSel=U.calRef=today();render()};
   main.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{U.calSel=b.dataset.d;if(pd(b.dataset.d).getMonth()!==pd(U.calRef).getMonth())U.calRef=b.dataset.d;render()});
-  main.querySelectorAll('[data-ym]').forEach(b=>b.onclick=()=>{U.calMode='month';U.calRef=b.dataset.ym;render()});
-  main.querySelectorAll('[data-yd]').forEach(b=>b.onclick=e=>{e.stopPropagation();U.calMode='list';U.calRef=U.calSel=b.dataset.yd;render()});
+  if(mode==='year'){const sec=main.querySelector(`.ysec[data-y="${ref.getFullYear()}"]`);if(sec){const hd=document.querySelector('header').offsetHeight;const sc=pageScroller();sc.scrollTop+=sec.getBoundingClientRect().top-hd-4}}
   main.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>quickAdd({date:b.dataset.add}));
   main.querySelectorAll('[data-slot]').forEach(c=>c.onclick=e=>{if(e.target!==c)return;const r=c.getBoundingClientRect();const hr=Math.max(0,Math.min(23,Math.floor((e.clientY-r.top)/(+c.dataset.hh||48))));quickAdd({date:c.dataset.slot,time:pad(hr)+':00'})});
   main.querySelectorAll('[data-ev]').forEach(b=>b.onclick=e=>{e.stopPropagation();if(b._dragged)return;openTask(b.dataset.ev)});
@@ -1386,11 +1389,11 @@ function renderCal(){
   bindTaskEvents();
 }
 /* сетка по часам занимает ровно экран: шапка не уезжает, прокручиваются только часы */
-function fitCal(){if(!main.classList.contains('calfit'))return;window.scrollTo(0,0);const top=main.getBoundingClientRect().top;const tabs=$('#tabs').offsetHeight;const vh=(window.visualViewport?visualViewport.height:innerHeight);main.style.height=Math.max(320,vh-top-tabs)+'px'}
+function fitCal(){if(!main.classList.contains('calfit'))return;scrollTop0();const top=main.getBoundingClientRect().top;const tabs=$('#tabs').offsetHeight;const vh=(window.visualViewport?visualViewport.height:innerHeight);main.style.height=Math.max(320,vh-top-tabs)+'px'}
 window.addEventListener('resize',fitCal);
 /* свайп влево/вправо только по полосе дней / сетке календаря */
 (function(){
-  const ZONE='.tgh,.mg,.yr,.card .grid7';
+  const ZONE='.tgh,.mg,.card .grid7';
   let x0=null,y0=0,ok=false,zone=null;
   main.addEventListener('touchstart',e=>{zone=null;if(U.view!=='cal'||e.touches.length!==1){x0=null;return}zone=e.target.closest(ZONE);if(!zone){x0=null;return}x0=e.touches[0].clientX;y0=e.touches[0].clientY;ok=true},{passive:true});
   main.addEventListener('touchmove',e=>{if(x0===null||!ok)return;const dx=e.touches[0].clientX-x0,dy=e.touches[0].clientY-y0;
@@ -1426,6 +1429,21 @@ function bigMonth(ref){
   return h+'</div>';
 }
 const MONSHORT=['янв.','февр.','март','апр.','май','июнь','июль','авг.','сент.','окт.','нояб.','дек.'];
+function yearBlock(y){return `<section class="ysec" data-y="${y}"><h2 class="yttl">${y}</h2>${yearView(y)}</section>`}
+/* год: плавная вертикальная прокрутка, годы подгружаются сверху и снизу */
+function pageScroller(){const b=document.body;return b.scrollHeight>b.clientHeight+1&&getComputedStyle(b).overflowY!=='visible'?b:(document.scrollingElement||document.documentElement)}
+document.addEventListener('scroll',()=>{
+  if(U.view!=='cal'||U.calMode!=='year')return;const box=$('#yrs');if(!box)return;const sc=pageScroller();
+  if(sc.clientHeight+sc.scrollTop>sc.scrollHeight-900){U.yrMax++;box.insertAdjacentHTML('beforeend',yearBlock(U.yrMax))}
+  if(sc.scrollTop<700){const before=sc.scrollHeight;U.yrMin--;box.insertAdjacentHTML('afterbegin',yearBlock(U.yrMin));sc.scrollTop+=sc.scrollHeight-before}
+  // запоминаем год, который сейчас на экране
+  const hd=document.querySelector('header').offsetHeight;let cur=null;box.querySelectorAll('.ysec').forEach(s=>{if(s.getBoundingClientRect().top<=hd+120)cur=s.dataset.y});if(cur)U.calRef=`${cur}-${U.calRef.slice(5)}`;
+},{passive:true,capture:true});
+main.addEventListener('click',e=>{
+  if(U.view!=='cal'||U.calMode!=='year')return;
+  const d=e.target.closest('[data-yd]');if(d){U.calMode='list';U.calRef=U.calSel=d.dataset.yd;render();return}
+  const m=e.target.closest('[data-ym]');if(m){U.calMode='month';U.calRef=m.dataset.ym;render()}
+});
 function yearView(y){
   const tdy=today();const has=new Set();
   const rep=S.tasks.filter(t=>t.repeat&&!t.done&&t.date);
@@ -1439,7 +1457,7 @@ function yearView(y){
     const cur=y===new Date().getFullYear()&&m===new Date().getMonth();
     h+=`<button class="ym ${cur?'cur':''}" data-ym="${y}-${pad(m+1)}-01"><b>${MONSHORT[m]}</b><div class="g">${g}</div></button>`;
   }
-  return h+'</div><p class="note" style="text-align:center;margin-top:14px">Нажмите на месяц, чтобы открыть его, или на число — чтобы увидеть задачи дня.</p>';
+  return h+'</div>';
 }
 function layoutDay(evs,dur){
   // раскладывает пересекающиеся задачи по колонкам: [{t,start,col,cols}]
@@ -1718,7 +1736,7 @@ function renderMore(){
     <p class="note">Веб-приложение присылает уведомления, пока оно открыто или недавно свёрнуто. Для важных дел нажмите в задаче «📅 В Календарь iPhone» — тогда напомнит системный Календарь, даже если приложение закрыто.</p></div>
    <div class="card sec mt"><h3>💾 Где хранятся данные</h3>
     <p class="note">Только на этом устройстве, в браузере. Никаких аккаунтов и серверов. ${storageOk?'':'<b style="color:var(--p3)">Сейчас хранилище недоступно — данные не сохранятся после закрытия.</b>'} Делайте резервную копию раз в пару недель: если долго не открывать веб-приложение, iOS может очистить его данные.</p></div>
-   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v3.7</p>`;
+   <p class="note" style="text-align:center;margin-top:20px">Мой планировщик · v3.8</p>`;
   main.querySelectorAll('[data-acc]').forEach(b=>b.onclick=()=>{S.settings.accent=b.dataset.acc;save();applyAccent();render()});
   main.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{S.settings.theme=b.dataset.th;save();applyTheme();render()});
   const nb=$('#nBtn');if(nb)nb.onclick=async()=>{
@@ -1774,7 +1792,7 @@ $('#fab').onclick=()=>{
 };
 const TABS=[['tasks','Задачи',I.tasks],['cal','Календарь',I.cal],['habits','Привычки',I.habit],['focus','Фокус',I.focus],['more','Ещё',I.more]];
 $('#tabs .wrap').innerHTML=TABS.map(([v,n,ic])=>`<button data-v="${v}">${ic}<span>${n}</span></button>`).join('');
-document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{U.view=b.dataset.v;if($('#sheet').classList.contains('on'))closeSheet();window.scrollTo(0,0);render()});
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{U.view=b.dataset.v;if($('#sheet').classList.contains('on'))closeSheet();scrollTop0();render()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($('#menu').classList.contains('on')){closeMenu();return}if(U.sel){U.sel=null;render();return}if($('#dp').classList.contains('on')){$('#dp').classList.remove('on');return}if($('#sheet').classList.contains('on'))closeSheet();else closeDrawer()}});
 
 // timer: если таймер «истёк» пока приложение было закрыто
